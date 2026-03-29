@@ -1,0 +1,13 @@
+export const API_BASE_URL = "https://api.freeapi.app/";
+
+export const STORAGE_KEYS = {
+  USER_DATA: "USER_DATA",
+  BOOKMARKS: "BOOKMARKS",
+  ENROLLED_COURSES: "ENROLLED_COURSES",
+  LAST_OPEN_TIMESTAMP: "LAST_OPEN_TIMESTAMP",
+  PROFILE_IMAGE: "PROFILE_IMAGE",
+};
+
+export const SECURE_KEYS = {
+  AUTH_TOKEN: "AUTH_TOKEN",
+};
