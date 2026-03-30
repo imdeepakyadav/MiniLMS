@@ -1,19 +1,7 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { COLORS, FONT_SIZE, FONT_WEIGHT } from "@utils/theme";
 import { Tabs } from "expo-router";
 import React from "react";
-import { Text } from "react-native";
-
-const TabIcon = ({ label }: { label: string }) => (
-  <Text
-    style={{
-      color: COLORS.primary,
-      fontSize: FONT_SIZE.md,
-      fontWeight: FONT_WEIGHT.bold,
-    }}
-  >
-    {label}
-  </Text>
-);
 
 export default function TabsLayout() {
   return (
@@ -36,21 +24,27 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: () => <TabIcon label="⌂" />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="bookmarks"
         options={{
           title: "Bookmarks",
-          tabBarIcon: () => <TabIcon label="★" />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bookmark-outline" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: () => <TabIcon label="☺" />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" color={color} size={size} />
+          ),
         }}
       />
     </Tabs>

@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type ValidationErrors = Partial<{
   username: string;
@@ -76,143 +77,149 @@ export default function RegisterScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>MiniLMS</Text>
-          <Text style={styles.subtitle}>Create your account.</Text>
-        </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>MiniLMS</Text>
+            <Text style={styles.subtitle}>Create your account.</Text>
+          </View>
 
-        <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
-            <TextInput
-              style={[
-                styles.input,
-                validationErrors.username ? styles.inputError : null,
-              ]}
-              placeholder="Choose a username"
-              placeholderTextColor={COLORS.textSecondary}
-              value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-                setValidationErrors((current) => ({
-                  ...current,
-                  username: undefined,
-                }));
-                clearError();
-              }}
+          <View style={styles.formContainer}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Username</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  validationErrors.username ? styles.inputError : null,
+                ]}
+                placeholder="Choose a username"
+                placeholderTextColor={COLORS.textSecondary}
+                value={username}
+                onChangeText={(text) => {
+                  setUsername(text);
+                  setValidationErrors((current) => ({
+                    ...current,
+                    username: undefined,
+                  }));
+                  clearError();
+                }}
+              />
+              {validationErrors.username ? (
+                <Text style={styles.errorText}>
+                  {validationErrors.username}
+                </Text>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  validationErrors.email ? styles.inputError : null,
+                ]}
+                placeholder="Enter your email"
+                placeholderTextColor={COLORS.textSecondary}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setValidationErrors((current) => ({
+                    ...current,
+                    email: undefined,
+                  }));
+                  clearError();
+                }}
+              />
+              {validationErrors.email ? (
+                <Text style={styles.errorText}>{validationErrors.email}</Text>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  validationErrors.password ? styles.inputError : null,
+                ]}
+                placeholder="Create a password"
+                placeholderTextColor={COLORS.textSecondary}
+                secureTextEntry
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setValidationErrors((current) => ({
+                    ...current,
+                    password: undefined,
+                  }));
+                  clearError();
+                }}
+              />
+              {validationErrors.password ? (
+                <Text style={styles.errorText}>
+                  {validationErrors.password}
+                </Text>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  validationErrors.confirmPassword ? styles.inputError : null,
+                ]}
+                placeholder="Re-enter your password"
+                placeholderTextColor={COLORS.textSecondary}
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={(text) => {
+                  setConfirmPassword(text);
+                  setValidationErrors((current) => ({
+                    ...current,
+                    confirmPassword: undefined,
+                  }));
+                  clearError();
+                }}
+              />
+              {validationErrors.confirmPassword ? (
+                <Text style={styles.errorText}>
+                  {validationErrors.confirmPassword}
+                </Text>
+              ) : null}
+            </View>
+
+            <Button
+              label="Register"
+              onPress={handleRegister}
+              loading={isLoading}
             />
-            {validationErrors.username ? (
-              <Text style={styles.errorText}>{validationErrors.username}</Text>
+
+            {apiError ? (
+              <ErrorBanner message={apiError} onDismiss={clearError} />
             ) : null}
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <Link href="/(auth)/login" asChild>
+                <TouchableOpacity disabled={isLoading}>
+                  <Text style={styles.footerLink}>Login</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
           </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={[
-                styles.input,
-                validationErrors.email ? styles.inputError : null,
-              ]}
-              placeholder="Enter your email"
-              placeholderTextColor={COLORS.textSecondary}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setValidationErrors((current) => ({
-                  ...current,
-                  email: undefined,
-                }));
-                clearError();
-              }}
-            />
-            {validationErrors.email ? (
-              <Text style={styles.errorText}>{validationErrors.email}</Text>
-            ) : null}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={[
-                styles.input,
-                validationErrors.password ? styles.inputError : null,
-              ]}
-              placeholder="Create a password"
-              placeholderTextColor={COLORS.textSecondary}
-              secureTextEntry
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setValidationErrors((current) => ({
-                  ...current,
-                  password: undefined,
-                }));
-                clearError();
-              }}
-            />
-            {validationErrors.password ? (
-              <Text style={styles.errorText}>{validationErrors.password}</Text>
-            ) : null}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput
-              style={[
-                styles.input,
-                validationErrors.confirmPassword ? styles.inputError : null,
-              ]}
-              placeholder="Re-enter your password"
-              placeholderTextColor={COLORS.textSecondary}
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={(text) => {
-                setConfirmPassword(text);
-                setValidationErrors((current) => ({
-                  ...current,
-                  confirmPassword: undefined,
-                }));
-                clearError();
-              }}
-            />
-            {validationErrors.confirmPassword ? (
-              <Text style={styles.errorText}>
-                {validationErrors.confirmPassword}
-              </Text>
-            ) : null}
-          </View>
-
-          <Button
-            label="Register"
-            onPress={handleRegister}
-            loading={isLoading}
-          />
-
-          {apiError ? (
-            <ErrorBanner message={apiError} onDismiss={clearError} />
-          ) : null}
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <Link href="/(auth)/login" asChild>
-              <TouchableOpacity disabled={isLoading}>
-                <Text style={styles.footerLink}>Login</Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

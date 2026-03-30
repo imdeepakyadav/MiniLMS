@@ -1,6 +1,7 @@
 import { Button } from "@components/ui/Button";
 import { ErrorBanner } from "@components/ui/ErrorBanner";
 import { Loader } from "@components/ui/Loader";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useCourseStore } from "@store/courseStore";
@@ -15,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CourseDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
@@ -50,7 +52,7 @@ export default function CourseDetailsScreen() {
 
   if (!course) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         <Stack.Screen
           options={{
             headerShown: true,
@@ -68,12 +70,12 @@ export default function CourseDetailsScreen() {
             variant="outline"
           />
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -86,7 +88,11 @@ export default function CourseDetailsScreen() {
               onPress={() => router.back()}
               style={styles.headerAction}
             >
-              <Text style={styles.headerActionText}>←</Text>
+              <Ionicons
+                name="arrow-back"
+                size={22}
+                color={COLORS.textPrimary}
+              />
             </TouchableOpacity>
           ),
           headerRight: () => (
@@ -94,9 +100,11 @@ export default function CourseDetailsScreen() {
               onPress={() => toggleBookmark(course.id)}
               style={styles.headerAction}
             >
-              <Text style={styles.headerActionText}>
-                {isBookmarked(course.id) ? "★" : "☆"}
-              </Text>
+              <Ionicons
+                name={isBookmarked(course.id) ? "star" : "star-outline"}
+                size={22}
+                color={COLORS.primary}
+              />
             </TouchableOpacity>
           ),
         }}
@@ -150,7 +158,7 @@ export default function CourseDetailsScreen() {
           variant="outline"
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -1,5 +1,6 @@
 import { CourseCard } from "@components/course/CourseCard";
 import { SkeletonCard } from "@components/ui/SkeletonCard";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useCourseStore } from "@store/courseStore";
@@ -7,6 +8,7 @@ import { COLORS, FONT_SIZE, FONT_WEIGHT, SPACING } from "@utils/theme";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BookmarksScreen() {
   const { bookmarkedCourses, toggleBookmark } = useBookmarks();
@@ -20,7 +22,7 @@ export default function BookmarksScreen() {
   }, [courses.length, refetch]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Bookmarks</Text>
         <Text style={styles.subtitle}>Courses you saved for later.</Text>
@@ -49,7 +51,12 @@ export default function BookmarksScreen() {
           ]}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>★</Text>
+              <Ionicons
+                name="bookmark-outline"
+                size={36}
+                color={COLORS.primary}
+                style={styles.emptyIcon}
+              />
               <Text style={styles.emptyTitle}>No bookmarks yet</Text>
               <Text style={styles.emptyText}>
                 Start exploring courses and tap the star to save them here.
@@ -63,7 +70,7 @@ export default function BookmarksScreen() {
       <Text style={styles.hint}>
         Swipe-to-remove is ready for a future pass.
       </Text>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -101,11 +108,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: SPACING.xl,
   },
-  emptyIcon: {
-    color: COLORS.primary,
-    fontSize: 36,
-    marginBottom: SPACING.sm,
-  },
+  emptyIcon: { marginBottom: SPACING.sm },
   emptyTitle: {
     color: COLORS.textPrimary,
     fontSize: FONT_SIZE.lg,

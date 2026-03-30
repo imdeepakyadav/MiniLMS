@@ -2,6 +2,7 @@ import { CourseCard } from "@components/course/CourseCard";
 import { Button } from "@components/ui/Button";
 import { ErrorBanner } from "@components/ui/ErrorBanner";
 import { SkeletonCard } from "@components/ui/SkeletonCard";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useDebounce } from "@hooks/useDebounce";
@@ -17,6 +18,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { courses, isLoading, error, refetch } = useCourses();
@@ -43,14 +45,19 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Explore Courses</Text>
         <Text style={styles.subtitle}>Find something to learn today.</Text>
       </View>
 
       <View style={styles.searchBar}>
-        <Text style={styles.searchIcon}>⌕</Text>
+        <Ionicons
+          name="search"
+          size={FONT_SIZE.lg}
+          color={COLORS.primary}
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Search courses or instructors"
@@ -97,7 +104,12 @@ export default function HomeScreen() {
           ListEmptyComponent={
             error ? null : (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyIcon}>⌁</Text>
+                <Ionicons
+                  name="search-outline"
+                  size={36}
+                  color={COLORS.primary}
+                  style={styles.emptyIcon}
+                />
                 <Text style={styles.emptyTitle}>No courses found</Text>
                 <Text style={styles.emptyText}>
                   Try a different search term or refresh the catalog.
@@ -108,7 +120,7 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -144,8 +156,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   searchIcon: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZE.lg,
     marginRight: SPACING.sm,
   },
   searchInput: {
@@ -170,11 +180,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: SPACING.xl,
   },
-  emptyIcon: {
-    color: COLORS.primary,
-    fontSize: 36,
-    marginBottom: SPACING.sm,
-  },
+  emptyIcon: { marginBottom: SPACING.sm },
   emptyTitle: {
     color: COLORS.textPrimary,
     fontSize: FONT_SIZE.lg,

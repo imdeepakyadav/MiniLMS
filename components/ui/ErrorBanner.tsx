@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { COLORS, FONT_SIZE, RADIUS, SPACING } from "@utils/theme";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -20,7 +21,7 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
           hitSlop={10}
           style={styles.closeBtn}
         >
-          <Text style={styles.dismissText}>✕</Text>
+          <Ionicons name="close" size={18} color="#FFFFFF" />
         </TouchableOpacity>
       )}
     </View>
@@ -45,5 +46,4 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   closeBtn: { padding: 2 },
-  dismissText: { color: "#FFFFFF", fontSize: FONT_SIZE.md, fontWeight: "bold" },
 });

@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { COLORS, FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "@utils/theme";
 import React from "react";
 import {
@@ -35,9 +36,11 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         }}
         style={styles.bookmarkButton}
       >
-        <Text style={styles.bookmarkIcon}>
-          {course.isBookmarked ? "★" : "☆"}
-        </Text>
+        <Ionicons
+          name={course.isBookmarked ? "star" : "star-outline"}
+          size={20}
+          color={COLORS.primary}
+        />
       </TouchableOpacity>
 
       <View style={styles.contentRow}>

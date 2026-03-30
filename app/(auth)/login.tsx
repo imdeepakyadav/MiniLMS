@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -40,91 +41,93 @@ export default function LoginScreen() {
   const bannerMessage = error ?? localError;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.header}>
-          <Text style={styles.logoText}>MiniLMS</Text>
-          <Text style={styles.subtitle}>Learn without friction.</Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor={COLORS.textSecondary}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                clearError();
-                setLocalError(null);
-              }}
-            />
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Text style={styles.logoText}>MiniLMS</Text>
+            <Text style={styles.subtitle}>Learn without friction.</Text>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
+          <View style={styles.formContainer}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email</Text>
               <TextInput
-                style={styles.passwordInput}
-                placeholder="Enter your password"
+                style={styles.input}
+                placeholder="Enter your email"
                 placeholderTextColor={COLORS.textSecondary}
-                secureTextEntry={!showPassword}
-                value={password}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
                 onChangeText={(text) => {
-                  setPassword(text);
+                  setEmail(text);
                   clearError();
                   setLocalError(null);
                 }}
               />
-              <TouchableOpacity
-                onPress={() => setShowPassword((current) => !current)}
-                style={styles.toggleBtn}
-              >
-                <Text style={styles.toggleText}>
-                  {showPassword ? "Hide" : "Show"}
-                </Text>
-              </TouchableOpacity>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Enter your password"
+                  placeholderTextColor={COLORS.textSecondary}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    clearError();
+                    setLocalError(null);
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword((current) => !current)}
+                  style={styles.toggleBtn}
+                >
+                  <Text style={styles.toggleText}>
+                    {showPassword ? "Hide" : "Show"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <Button
+              label="Login"
+              onPress={handleLogin}
+              loading={isLoading}
+              variant="primary"
+            />
+
+            {bannerMessage ? (
+              <ErrorBanner
+                message={bannerMessage}
+                onDismiss={() => {
+                  clearError();
+                  setLocalError(null);
+                }}
+              />
+            ) : null}
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don't have an account? </Text>
+              <Link href="/(auth)/register" asChild>
+                <TouchableOpacity disabled={isLoading}>
+                  <Text style={styles.footerLink}>Register</Text>
+                </TouchableOpacity>
+              </Link>
             </View>
           </View>
-
-          <Button
-            label="Login"
-            onPress={handleLogin}
-            loading={isLoading}
-            variant="primary"
-          />
-
-          {bannerMessage ? (
-            <ErrorBanner
-              message={bannerMessage}
-              onDismiss={() => {
-                clearError();
-                setLocalError(null);
-              }}
-            />
-          ) : null}
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <Link href="/(auth)/register" asChild>
-              <TouchableOpacity disabled={isLoading}>
-                <Text style={styles.footerLink}>Register</Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
