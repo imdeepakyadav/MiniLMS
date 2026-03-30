@@ -4,8 +4,7 @@ let notificationPermissionGranted = false;
 let notificationsModule: typeof import("expo-notifications") | null = null;
 
 const canUseNativeNotifications =
-  Constants.appOwnership === "standalone" ||
-  Constants.executionEnvironment === "bare";
+  Constants.executionEnvironment !== "storeClient";
 
 const loadNotificationsModule = async () => {
   if (!canUseNativeNotifications) {
@@ -17,6 +16,8 @@ const loadNotificationsModule = async () => {
     notificationsModule.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
         shouldPlaySound: false,
         shouldSetBadge: false,
       }),
@@ -86,7 +87,9 @@ export const scheduleReEngagementNotification = async (): Promise<boolean> => {
         body: "You haven't visited your courses in a while. Pick up where you left off.",
       },
       trigger: {
+        type: notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: 5,
+        repeats: false,
       },
     });
     return true;

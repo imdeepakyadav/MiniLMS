@@ -40,6 +40,7 @@ export const useAuth = () => {
     try {
       const response = await authService.register(data);
       await persistSession(response.data.accessToken, response.data.user);
+      console.log("Registration successful", response.data);
       return true;
     } catch (err: any) {
       setError(err.message || "Registration failed");

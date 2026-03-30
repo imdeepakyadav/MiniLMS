@@ -185,8 +185,7 @@ export default function WebViewScreen() {
                 document.getElementById('course-title').innerText = data.payload.title;
                 document.getElementById('instructor-name').innerText = 'by ' + data.payload.instructor;
               }
-            } catch (e) {
-              // Ignore malformed messages from the page bridge.
+            } catch {
             }
           });
 

@@ -29,9 +29,7 @@ export const getCurrentUser = async (): Promise<User> => {
 export const logout = async (): Promise<void> => {
   try {
     await apiPost("api/v1/users/logout");
-  } catch (err) {
-    // Ignore error if logout fails on server
-  }
+  } catch (err) {}
   await removeToken();
   await removeItem(STORAGE_KEYS.USER_DATA);
 };

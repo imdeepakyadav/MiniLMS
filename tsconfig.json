@@ -7,8 +7,7 @@
     "lib": [
       "esnext"
     ],
-    "ignoreDeprecations": "6.0",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "resolveJsonModule": true,
     "target": "esnext",
