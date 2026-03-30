@@ -1,4 +1,5 @@
 import { AuthProvider } from "@store/authStore";
+import { CourseStoreProvider } from "@store/courseStore";
 import { COLORS } from "@utils/theme";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -9,16 +10,18 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider style={{ backgroundColor: COLORS.background }}>
       <AuthProvider>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: COLORS.background },
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        </Stack>
+        <CourseStoreProvider>
+          <StatusBar style="light" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: COLORS.background },
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          </Stack>
+        </CourseStoreProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );
