@@ -1,5 +1,12 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { COLORS, FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "@utils/theme";
+import {
+  COLORS,
+  DIMENSIONS,
+  FONT_SIZE,
+  FONT_WEIGHT,
+  RADIUS,
+  SPACING,
+} from "@utils/theme";
 import React from "react";
 import {
   Image,
@@ -80,7 +87,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     padding: SPACING.md,
     marginBottom: SPACING.md,
-    shadowColor: "#000000",
+    shadowColor: COLORS.background,
     shadowOpacity: 0.2,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -104,8 +111,8 @@ const styles = StyleSheet.create({
     paddingRight: SPACING.lg,
   },
   thumbnail: {
-    width: 80,
-    height: 80,
+    width: DIMENSIONS.courseCardThumbnail,
+    height: DIMENSIONS.courseCardThumbnail,
     borderRadius: RADIUS.md,
     marginRight: SPACING.md,
     backgroundColor: COLORS.border,
@@ -127,8 +134,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   avatar: {
-    width: 22,
-    height: 22,
+    width: DIMENSIONS.courseCardAvatar,
+    height: DIMENSIONS.courseCardAvatar,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.border,
     marginRight: SPACING.xs,

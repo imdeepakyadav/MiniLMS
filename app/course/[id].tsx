@@ -1,11 +1,20 @@
 import { Button } from "@components/ui/Button";
+import { EmptyState } from "@components/ui/EmptyState";
 import { ErrorBanner } from "@components/ui/ErrorBanner";
 import { Loader } from "@components/ui/Loader";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useCourseStore } from "@store/courseStore";
-import { COLORS, FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "@utils/theme";
+import {
+  COLORS,
+  DIMENSIONS,
+  FONT_SIZE,
+  FONT_WEIGHT,
+  ICON_SIZE,
+  RADIUS,
+  SPACING,
+} from "@utils/theme";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import {
@@ -52,7 +61,10 @@ export default function CourseDetailsScreen() {
 
   if (!course) {
     return (
-      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <SafeAreaView
+        style={styles.container}
+        edges={["top", "left", "right", "bottom"]}
+      >
         <Stack.Screen
           options={{
             headerShown: true,
@@ -62,20 +74,22 @@ export default function CourseDetailsScreen() {
           }}
         />
         {error ? <ErrorBanner message={error} onDismiss={refetch} /> : null}
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>Course not found</Text>
-          <Button
-            label="Go Back"
-            onPress={() => router.back()}
-            variant="outline"
-          />
-        </View>
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Course not found"
+          subtitle={error ?? "We could not find that course."}
+          actionLabel={error ? "Retry" : "Go back"}
+          onAction={error ? refetch : () => router.back()}
+        />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "left", "right", "bottom"]}
+    >
       <Stack.Screen
         options={{
           headerShown: true,
@@ -90,7 +104,7 @@ export default function CourseDetailsScreen() {
             >
               <Ionicons
                 name="arrow-back"
-                size={22}
+                size={ICON_SIZE.md}
                 color={COLORS.textPrimary}
               />
             </TouchableOpacity>
@@ -102,7 +116,7 @@ export default function CourseDetailsScreen() {
             >
               <Ionicons
                 name={isBookmarked(course.id) ? "star" : "star-outline"}
-                size={22}
+                size={ICON_SIZE.md}
                 color={COLORS.primary}
               />
             </TouchableOpacity>
@@ -183,11 +197,11 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHT.bold,
   },
   scrollContent: {
-    paddingBottom: 140,
+    paddingBottom: DIMENSIONS.detailFooterOffset,
   },
   thumbnail: {
     width: "100%",
-    height: 220,
+    height: DIMENSIONS.courseThumbnailHeight,
     backgroundColor: COLORS.surface,
   },
   content: {
@@ -206,8 +220,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   avatar: {
-    width: 44,
-    height: 44,
+    width: DIMENSIONS.courseDetailAvatar,
+    height: DIMENSIONS.courseDetailAvatar,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.border,
     marginRight: SPACING.sm,

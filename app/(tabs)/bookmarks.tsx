@@ -1,19 +1,27 @@
 import { CourseCard } from "@components/course/CourseCard";
+import { EmptyState } from "@components/ui/EmptyState";
 import { SkeletonCard } from "@components/ui/SkeletonCard";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useCourseStore } from "@store/courseStore";
 import { COLORS, FONT_SIZE, FONT_WEIGHT, SPACING } from "@utils/theme";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BookmarksScreen() {
   const { bookmarkedCourses, toggleBookmark } = useBookmarks();
   const { isLoading, refetch } = useCourses();
   const { courses } = useCourseStore();
+  const { width, height } = useWindowDimensions();
+  const numColumns = width > height ? 2 : 1;
 
   useEffect(() => {
     if (!courses.length) {
@@ -22,7 +30,10 @@ export default function BookmarksScreen() {
   }, [courses.length, refetch]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "left", "right", "bottom"]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Bookmarks</Text>
         <Text style={styles.subtitle}>Courses you saved for later.</Text>
@@ -31,37 +42,39 @@ export default function BookmarksScreen() {
       {isLoading && courses.length === 0 ? (
         <View style={styles.listPadding}>
           {Array.from({ length: 6 }).map((_, index) => (
-            <SkeletonCard key={`bookmark-skeleton-${index}`} />
+            <View key={`bookmark-skeleton-${index}`} style={styles.gridItem}>
+              <SkeletonCard />
+            </View>
           ))}
         </View>
       ) : (
         <FlatList
+          key={numColumns}
           data={bookmarkedCourses}
+          numColumns={numColumns}
+          columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <CourseCard
-              course={item}
-              onPress={() => router.push(`/course/${item.id}`)}
-              onBookmarkToggle={() => toggleBookmark(item.id)}
-            />
+            <View style={styles.gridItem}>
+              <CourseCard
+                course={item}
+                onPress={() => router.push(`/course/${item.id}`)}
+                onBookmarkToggle={() => toggleBookmark(item.id)}
+              />
+            </View>
           )}
           contentContainerStyle={[
             styles.listContent,
             bookmarkedCourses.length === 0 ? styles.emptyContent : null,
           ]}
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Ionicons
-                name="bookmark-outline"
-                size={36}
-                color={COLORS.primary}
-                style={styles.emptyIcon}
-              />
-              <Text style={styles.emptyTitle}>No bookmarks yet</Text>
-              <Text style={styles.emptyText}>
-                Start exploring courses and tap the star to save them here.
-              </Text>
-            </View>
+            <EmptyState
+              icon="bookmark-outline"
+              title="No bookmarks yet"
+              subtitle="Start exploring courses and tap the star to save them here."
+              actionLabel="Browse courses"
+              onAction={() => router.push("/")}
+            />
           }
           showsVerticalScrollIndicator={false}
         />
@@ -104,22 +117,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
   },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: SPACING.xl,
+  columnWrapper: {
+    gap: SPACING.md,
   },
-  emptyIcon: { marginBottom: SPACING.sm },
-  emptyTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.xs,
-  },
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    textAlign: "center",
-    maxWidth: 300,
+  gridItem: {
+    flex: 1,
   },
   hint: {
     color: COLORS.textSecondary,

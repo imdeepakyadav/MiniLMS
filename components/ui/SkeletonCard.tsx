@@ -1,4 +1,4 @@
-import { COLORS, RADIUS, SPACING } from "@utils/theme";
+import { COLORS, DIMENSIONS, RADIUS, SPACING } from "@utils/theme";
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 
@@ -64,10 +64,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   thumbnail: {
-    width: 80,
-    height: 80,
+    width: DIMENSIONS.courseCardThumbnail,
+    height: DIMENSIONS.courseCardThumbnail,
     borderRadius: RADIUS.md,
-    backgroundColor: "#334155",
+    backgroundColor: COLORS.skeletonBase,
     marginRight: SPACING.md,
   },
   content: {
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     width: "78%",
     height: 16,
     borderRadius: RADIUS.full,
-    backgroundColor: "#334155",
+    backgroundColor: COLORS.skeletonBase,
     marginBottom: SPACING.sm,
   },
   instructorRow: {
@@ -86,10 +86,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   avatar: {
-    width: 22,
-    height: 22,
+    width: DIMENSIONS.courseCardAvatar,
+    height: DIMENSIONS.courseCardAvatar,
     borderRadius: RADIUS.full,
-    backgroundColor: "#334155",
+    backgroundColor: COLORS.skeletonBase,
     marginRight: SPACING.xs,
   },
   instructorName: {
@@ -102,13 +102,13 @@ const styles = StyleSheet.create({
     width: 72,
     height: 20,
     borderRadius: RADIUS.full,
-    backgroundColor: "#334155",
+    backgroundColor: COLORS.skeletonBase,
   },
   shimmer: {
     position: "absolute",
     top: 0,
     bottom: 0,
     width: 90,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: COLORS.skeletonShimmer,
   },
 });

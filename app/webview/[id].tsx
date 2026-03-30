@@ -1,9 +1,16 @@
 import { Button } from "@components/ui/Button";
+import { EmptyState } from "@components/ui/EmptyState";
 import { Loader } from "@components/ui/Loader";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCourses } from "@features/courses/useCourses";
 import { useCourseStore } from "@store/courseStore";
-import { COLORS, FONT_SIZE, FONT_WEIGHT, SPACING } from "@utils/theme";
+import {
+  COLORS,
+  FONT_SIZE,
+  FONT_WEIGHT,
+  ICON_SIZE,
+  SPACING,
+} from "@utils/theme";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -179,7 +186,7 @@ export default function WebViewScreen() {
                 document.getElementById('instructor-name').innerText = 'by ' + data.payload.instructor;
               }
             } catch (e) {
-              console.log('Invalid message payload');
+              // Ignore malformed messages from the page bridge.
             }
           });
 
@@ -287,9 +294,7 @@ export default function WebViewScreen() {
           { text: "OK" },
         ]);
       }
-    } catch (error) {
-      console.warn("Unable to parse webview message", error);
-    }
+    } catch {}
   };
 
   const handleRetry = () => {
@@ -300,7 +305,10 @@ export default function WebViewScreen() {
 
   if (!course && courseStoreLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <SafeAreaView
+        style={styles.container}
+        edges={["top", "left", "right", "bottom"]}
+      >
         <Stack.Screen
           options={{
             headerShown: true,
@@ -315,7 +323,7 @@ export default function WebViewScreen() {
               >
                 <Ionicons
                   name="arrow-back"
-                  size={22}
+                  size={ICON_SIZE.md}
                   color={COLORS.textPrimary}
                 />
               </TouchableOpacity>
@@ -331,7 +339,10 @@ export default function WebViewScreen() {
 
   if (!course) {
     return (
-      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <SafeAreaView
+        style={styles.container}
+        edges={["top", "left", "right", "bottom"]}
+      >
         <Stack.Screen
           options={{
             headerShown: true,
@@ -346,29 +357,29 @@ export default function WebViewScreen() {
               >
                 <Ionicons
                   name="arrow-back"
-                  size={22}
+                  size={ICON_SIZE.md}
                   color={COLORS.textPrimary}
                 />
               </TouchableOpacity>
             ),
           }}
         />
-        <View style={styles.errorState}>
-          <Ionicons
-            name="alert-circle-outline"
-            size={44}
-            color={COLORS.primary}
-            style={styles.errorIcon}
-          />
-          <Text style={styles.errorTitle}>Failed to load course content</Text>
-          <Button label="Retry" onPress={handleRetry} variant="primary" />
-        </View>
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Failed to load course content"
+          subtitle={error ?? "Please retry or go back to the course."}
+          actionLabel="Retry"
+          onAction={handleRetry}
+        />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "left", "right", "bottom"]}
+    >
       <Stack.Screen
         options={{
           headerShown: true,
@@ -383,7 +394,7 @@ export default function WebViewScreen() {
             >
               <Ionicons
                 name="arrow-back"
-                size={22}
+                size={ICON_SIZE.md}
                 color={COLORS.textPrimary}
               />
             </TouchableOpacity>
@@ -425,7 +436,7 @@ export default function WebViewScreen() {
           <View style={styles.errorOverlay}>
             <Ionicons
               name="alert-circle-outline"
-              size={44}
+              size={ICON_SIZE.xxl}
               color={COLORS.primary}
               style={styles.errorIcon}
             />

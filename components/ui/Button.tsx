@@ -13,6 +13,7 @@ interface ButtonProps {
   loading?: boolean;
   disabled?: boolean;
   variant?: "primary" | "outline" | "ghost";
+  tone?: "default" | "danger";
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -21,13 +22,24 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
   disabled = false,
   variant = "primary",
+  tone = "default",
 }) => {
   const getContainerStyle = () => {
     switch (variant) {
       case "outline":
-        return [styles.container, styles.outlineContainer];
+        return [
+          styles.container,
+          tone === "danger"
+            ? styles.dangerOutlineContainer
+            : styles.outlineContainer,
+        ];
       case "ghost":
-        return [styles.container, styles.ghostContainer];
+        return [
+          styles.container,
+          tone === "danger"
+            ? styles.dangerGhostContainer
+            : styles.ghostContainer,
+        ];
       default:
         return [styles.container, styles.primaryContainer];
     }
@@ -36,9 +48,15 @@ export const Button: React.FC<ButtonProps> = ({
   const getTextStyle = () => {
     switch (variant) {
       case "outline":
-        return [styles.text, styles.outlineText];
+        return [
+          styles.text,
+          tone === "danger" ? styles.dangerText : styles.outlineText,
+        ];
       case "ghost":
-        return [styles.text, styles.ghostText];
+        return [
+          styles.text,
+          tone === "danger" ? styles.dangerText : styles.ghostText,
+        ];
       default:
         return [styles.text, styles.primaryText];
     }
@@ -53,7 +71,7 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === "primary" ? "#FFFFFF" : COLORS.primary}
+          color={variant === "primary" ? COLORS.onPrimary : COLORS.primary}
         />
       ) : (
         <Text style={getTextStyle()}>{label}</Text>
@@ -77,10 +95,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.primary,
   },
+  dangerOutlineContainer: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: COLORS.error,
+  },
   ghostContainer: { backgroundColor: "transparent" },
+  dangerGhostContainer: { backgroundColor: "transparent" },
   disabled: { opacity: 0.5 },
   text: { fontSize: FONT_SIZE.md, fontWeight: "600" },
-  primaryText: { color: "#FFFFFF" },
+  primaryText: { color: COLORS.onPrimary },
   outlineText: { color: COLORS.primary },
   ghostText: { color: COLORS.primary },
+  dangerText: { color: COLORS.error },
 });

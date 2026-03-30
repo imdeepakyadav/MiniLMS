@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   text: {
-    color: "#FFFFFF",
+    color: COLORS.onPrimary,
     fontSize: FONT_SIZE.sm,
     textAlign: "center",
   },

@@ -8,6 +8,9 @@ export const COLORS = {
   error: "#EF4444",
   warning: "#F59E0B",
   border: "#334155",
+  onPrimary: "#FFFFFF",
+  skeletonBase: "#334155",
+  skeletonShimmer: "rgba(255, 255, 255, 0.08)",
 };
 
 export const SPACING = {
@@ -40,4 +43,26 @@ export const FONT_WEIGHT = {
   medium: "500",
   semibold: "600",
   bold: "700",
+} as const;
+
+export const ICON_SIZE = {
+  sm: 18,
+  md: 22,
+  lg: 24,
+  xl: 36,
+  xxl: 44,
+  profile: 48,
+} as const;
+
+export const DIMENSIONS = {
+  avatarLarge: 100,
+  tabBarHeight: 60,
+  courseCardThumbnail: 80,
+  courseCardAvatar: 22,
+  courseThumbnailHeight: 220,
+  courseDetailAvatar: 44,
+  emptyStateIcon: 48,
+  detailFooterOffset: 140,
+  webViewCardRadius: 20,
+  webViewMaxWidth: 320,
 } as const;

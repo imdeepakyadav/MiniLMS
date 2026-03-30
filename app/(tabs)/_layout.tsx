@@ -1,13 +1,15 @@
 import OfflineBanner from "@components/ui/OfflineBanner";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import useNetworkStatus from "@hooks/useNetworkStatus";
-import { COLORS, FONT_SIZE, FONT_WEIGHT } from "@utils/theme";
+import { useCourseStore } from "@store/courseStore";
+import { COLORS, DIMENSIONS, FONT_SIZE, FONT_WEIGHT } from "@utils/theme";
 import { Tabs } from "expo-router";
 import React from "react";
 import { View } from "react-native";
 
 export default function TabsLayout() {
   const { isConnected } = useNetworkStatus();
+  const { bookmarks } = useCourseStore();
 
   return (
     <View style={{ flex: 1 }}>
@@ -19,11 +21,20 @@ export default function TabsLayout() {
           tabBarInactiveTintColor: COLORS.textSecondary,
           tabBarStyle: {
             backgroundColor: COLORS.surface,
-            borderTopColor: COLORS.border,
+            borderTopWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+            height: DIMENSIONS.tabBarHeight,
           },
           tabBarLabelStyle: {
             fontSize: FONT_SIZE.xs,
             fontWeight: FONT_WEIGHT.semibold,
+          },
+          tabBarBadgeStyle: {
+            backgroundColor: COLORS.primary,
+            color: COLORS.onPrimary,
+            fontSize: FONT_SIZE.xs,
+            fontWeight: FONT_WEIGHT.bold,
           },
         }}
       >
@@ -40,6 +51,7 @@ export default function TabsLayout() {
           name="bookmarks"
           options={{
             title: "Bookmarks",
+            tabBarBadge: bookmarks.length > 0 ? bookmarks.length : undefined,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="bookmark-outline" color={color} size={size} />
             ),

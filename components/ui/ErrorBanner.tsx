@@ -21,7 +21,7 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
           hitSlop={10}
           style={styles.closeBtn}
         >
-          <Ionicons name="close" size={18} color="#FFFFFF" />
+          <Ionicons name="close" size={18} color={COLORS.onPrimary} />
         </TouchableOpacity>
       )}
     </View>
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   text: {
-    color: "#FFFFFF",
+    color: COLORS.onPrimary,
     fontSize: FONT_SIZE.sm,
     flex: 1,
     marginRight: SPACING.sm,

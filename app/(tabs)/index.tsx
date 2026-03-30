@@ -1,11 +1,13 @@
 import { CourseCard } from "@components/course/CourseCard";
 import { Button } from "@components/ui/Button";
+import { EmptyState } from "@components/ui/EmptyState";
 import { ErrorBanner } from "@components/ui/ErrorBanner";
 import { SkeletonCard } from "@components/ui/SkeletonCard";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useDebounce } from "@hooks/useDebounce";
+import { useAuthStore } from "@store/authStore";
 import { useCourseStore } from "@store/courseStore";
 import { COLORS, FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "@utils/theme";
 import { router } from "expo-router";
@@ -17,16 +19,20 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { courses, isLoading, error, refetch } = useCourses();
   const { toggleBookmark } = useBookmarks();
+  const { user } = useAuthStore();
   const { courses: allCourses, dispatch } = useCourseStore();
   const [searchText, setSearchText] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const debouncedSearchText = useDebounce(searchText, 300);
+  const { width, height } = useWindowDimensions();
+  const numColumns = width > height ? 2 : 1;
 
   useEffect(() => {
     dispatch({ type: "SET_SEARCH_QUERY", payload: debouncedSearchText });
@@ -45,10 +51,18 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Explore Courses</Text>
-        <Text style={styles.subtitle}>Find something to learn today.</Text>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "left", "right", "bottom"]}
+    >
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.logoText}>MiniLMS</Text>
+          <Text style={styles.subtitle}>Find something to learn today.</Text>
+        </View>
+        <Text style={styles.greeting} numberOfLines={1}>
+          Hi, {user?.username ?? "Learner"} 👋
+        </Text>
       </View>
 
       <View style={styles.searchBar}>
@@ -75,21 +89,28 @@ export default function HomeScreen() {
       ) : null}
 
       {isLoading && allCourses.length === 0 ? (
-        <View style={styles.listPadding}>
+        <View style={styles.skeletonGrid}>
           {Array.from({ length: 6 }).map((_, index) => (
-            <SkeletonCard key={`skeleton-${index}`} />
+            <View key={`skeleton-${index}`} style={styles.gridItem}>
+              <SkeletonCard />
+            </View>
           ))}
         </View>
       ) : (
         <FlatList
+          key={numColumns}
           data={courses}
+          numColumns={numColumns}
+          columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <CourseCard
-              course={item}
-              onPress={() => router.push(`/course/${item.id}`)}
-              onBookmarkToggle={() => toggleBookmark(item.id)}
-            />
+            <View style={styles.gridItem}>
+              <CourseCard
+                course={item}
+                onPress={() => router.push(`/course/${item.id}`)}
+                onBookmarkToggle={() => toggleBookmark(item.id)}
+              />
+            </View>
           )}
           refreshControl={
             <RefreshControl
@@ -103,18 +124,13 @@ export default function HomeScreen() {
           ]}
           ListEmptyComponent={
             error ? null : (
-              <View style={styles.emptyState}>
-                <Ionicons
-                  name="search-outline"
-                  size={36}
-                  color={COLORS.primary}
-                  style={styles.emptyIcon}
-                />
-                <Text style={styles.emptyTitle}>No courses found</Text>
-                <Text style={styles.emptyText}>
-                  Try a different search term or refresh the catalog.
-                </Text>
-              </View>
+              <EmptyState
+                icon="search-outline"
+                title="No courses found"
+                subtitle="Try a different search term or refresh the catalog."
+                actionLabel={searchText ? "Clear search" : undefined}
+                onAction={searchText ? () => setSearchText("") : undefined}
+              />
             )
           }
           showsVerticalScrollIndicator={false}
@@ -131,18 +147,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
   },
-  header: {
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     marginBottom: SPACING.md,
   },
-  title: {
+  logoText: {
     color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xl,
+    fontSize: FONT_SIZE.xxl,
     fontWeight: FONT_WEIGHT.bold,
     marginBottom: SPACING.xs,
+    letterSpacing: 0.4,
   },
   subtitle: {
     color: COLORS.textSecondary,
     fontSize: FONT_SIZE.sm,
+  },
+  greeting: {
+    color: COLORS.textSecondary,
+    fontSize: FONT_SIZE.sm,
+    fontWeight: FONT_WEIGHT.medium,
+    textAlign: "right",
+    flexShrink: 1,
+    marginLeft: SPACING.md,
+    marginTop: SPACING.xs,
   },
   searchBar: {
     flexDirection: "row",
@@ -166,7 +195,7 @@ const styles = StyleSheet.create({
   errorBlock: {
     marginBottom: SPACING.md,
   },
-  listPadding: {
+  skeletonGrid: {
     paddingBottom: SPACING.xl,
   },
   listContent: {
@@ -176,16 +205,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
   },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: SPACING.xl,
+  columnWrapper: {
+    gap: SPACING.md,
   },
-  emptyIcon: { marginBottom: SPACING.sm },
-  emptyTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.xs,
+  gridItem: {
+    flex: 1,
   },
   emptyText: {
     color: COLORS.textSecondary,
