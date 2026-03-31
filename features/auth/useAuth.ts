@@ -1,32 +1,14 @@
-import { saveToken } from "@services/secureStorage";
+import { saveRefreshToken, saveToken } from "@services/secureStorage";
 import { setItem } from "@services/storage";
 import { useAuthStore } from "@store/authStore";
 import { STORAGE_KEYS } from "@utils/constants";
 import { useState } from "react";
-import { LoginRequest, RegisterRequest, User } from "../../types/auth.types";
+import {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+} from "../../types/auth.types";
 import * as authService from "./authService";
-
-const resolveAccessToken = (value: unknown): string | null => {
-  if (typeof value === "string") {
-    return value.trim() ? value : null;
-  }
-
-  if (value && typeof value === "object") {
-    const tokenLikeValue = value as {
-      accessToken?: unknown;
-      token?: unknown;
-      data?: unknown;
-    };
-
-    return (
-      resolveAccessToken(tokenLikeValue.accessToken) ??
-      resolveAccessToken(tokenLikeValue.token) ??
-      resolveAccessToken(tokenLikeValue.data)
-    );
-  }
-
-  return null;
-};
 
 export const useAuth = () => {
   const { dispatch } = useAuthStore();
@@ -35,14 +17,18 @@ export const useAuth = () => {
 
   const clearError = () => setError(null);
 
-  const persistSession = async (accessToken: unknown, user: User) => {
-    const resolvedToken = resolveAccessToken(accessToken);
+  const persistSession = async (response: AuthResponse) => {
+    const { user, accessToken, refreshToken } = response.data;
 
-    if (!resolvedToken) {
-      throw new Error("Authentication token missing from response");
+    if (!accessToken) {
+      throw new Error("Auth token was not returned by the server.");
     }
 
-    await saveToken(resolvedToken);
+    await saveToken(accessToken);
+    if (refreshToken) {
+      await saveRefreshToken(refreshToken);
+    }
+
     await setItem(STORAGE_KEYS.USER_DATA, user);
     dispatch({ type: "LOGIN", payload: user });
   };
@@ -52,7 +38,7 @@ export const useAuth = () => {
     clearError();
     try {
       const response = await authService.login(data);
-      await persistSession(response.data.accessToken, response.data.user);
+      await persistSession(response);
       return true;
     } catch (err: any) {
       setError(err.message || "Login failed");
@@ -67,7 +53,17 @@ export const useAuth = () => {
     clearError();
     try {
       const response = await authService.register(data);
-      await persistSession(response.data.accessToken, response.data.user);
+
+      if (response.data.accessToken) {
+        await persistSession(response);
+      } else {
+        const loginResponse = await authService.login({
+          email: data.email,
+          password: data.password,
+        });
+        await persistSession(loginResponse);
+      }
+
       return true;
     } catch (err: any) {
       setError(err.message || "Registration failed");

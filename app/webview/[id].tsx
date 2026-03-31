@@ -13,7 +13,14 @@ import {
 } from "@utils/theme";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 
@@ -41,6 +48,9 @@ export default function WebViewScreen() {
       <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <script>
+          window.__courseHeaders = window.__courseHeaders || {};
+        </script>
         <style>
           :root {
             color-scheme: dark;
@@ -104,6 +114,18 @@ export default function WebViewScreen() {
             margin-top: 8px;
             color: var(--muted);
             font-size: 14px;
+          }
+
+          .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 14px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.14);
+            color: #c7d2fe;
+            font-size: 12px;
+            font-weight: 700;
           }
 
           .panel {
@@ -208,6 +230,7 @@ export default function WebViewScreen() {
             <div class="eyebrow">Course Content</div>
             <h1 id="course-title">Course Title</h1>
             <div class="instructor" id="instructor-name">by Instructor</div>
+            <div class="platform-badge" id="platform-badge">Viewing on web</div>
           </div>
 
           <div class="panel">
@@ -255,8 +278,21 @@ export default function WebViewScreen() {
         </div>
       </body>
       </html>
-    `;
+      `;
   }, []);
+
+  const webViewHeaders = useMemo(
+    () => ({
+      "X-Course-Id": course?.id ?? "",
+      "X-Course-Title": encodeURIComponent(course?.title ?? ""),
+      "X-Instructor": encodeURIComponent(course?.instructorName ?? ""),
+      "X-App-Version": "1.0.0",
+      "X-Platform": Platform.OS,
+    }),
+    [course?.id, course?.instructorName, course?.title],
+  );
+
+  const WebViewComponent = WebView as unknown as React.ComponentType<any>;
 
   const sendCourseData = () => {
     if (!course) {
@@ -276,6 +312,26 @@ export default function WebViewScreen() {
       window.dispatchEvent(new MessageEvent('message', {
         data: ${JSON.stringify(JSON.stringify(payload))}
       }));
+      true;
+    `);
+  };
+
+  const injectCourseHeaders = () => {
+    if (!course) {
+      return;
+    }
+
+    // react-native-webview does not expose request headers directly to JS,
+    // so we intentionally send metadata both as headers and via injected JS.
+    webViewRef.current?.injectJavaScript(`
+      window.__courseHeaders = {
+        courseId: ${JSON.stringify(course.id)},
+        title: ${JSON.stringify(course.title)},
+        instructor: ${JSON.stringify(course.instructorName)},
+        platform: ${JSON.stringify(Platform.OS)}
+      };
+      document.getElementById('platform-badge').innerText =
+        'Viewing on ' + window.__courseHeaders.platform;
       true;
     `);
   };
@@ -402,7 +458,7 @@ export default function WebViewScreen() {
       />
 
       <View style={styles.webViewContainer}>
-        <WebView
+        <WebViewComponent
           key={webViewKey}
           ref={webViewRef}
           source={{ html: htmlContent }}
@@ -411,16 +467,18 @@ export default function WebViewScreen() {
           onLoadStart={() => setLoading(true)}
           onLoadEnd={() => {
             setLoading(false);
+            injectCourseHeaders();
             sendCourseData();
           }}
           onMessage={handleMessage}
-          onError={(syntheticEvent) => {
+          onError={(syntheticEvent: any) => {
             setError(
               syntheticEvent.nativeEvent.description ??
                 "Failed to load course content",
             );
             setLoading(false);
           }}
+          headers={webViewHeaders}
           originWhitelist={["*"]}
           style={styles.webView}
         />

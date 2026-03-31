@@ -24,7 +24,7 @@ interface CourseCardProps {
   onBookmarkToggle: () => void;
 }
 
-export const CourseCard: React.FC<CourseCardProps> = ({
+const CourseCardBase: React.FC<CourseCardProps> = ({
   course,
   onPress,
   onBookmarkToggle,
@@ -80,6 +80,18 @@ export const CourseCard: React.FC<CourseCardProps> = ({
     </TouchableOpacity>
   );
 };
+
+const areEqual = (prev: CourseCardProps, next: CourseCardProps) => {
+  return (
+    prev.course.id === next.course.id &&
+    prev.course.isBookmarked === next.course.isBookmarked &&
+    prev.course.isEnrolled === next.course.isEnrolled &&
+    prev.onPress === next.onPress &&
+    prev.onBookmarkToggle === next.onBookmarkToggle
+  );
+};
+
+export const CourseCard = React.memo(CourseCardBase, areEqual);
 
 const styles = StyleSheet.create({
   card: {

@@ -11,4 +11,5 @@ export const STORAGE_KEYS = {
 
 export const SECURE_KEYS = {
   AUTH_TOKEN: "AUTH_TOKEN",
+  REFRESH_TOKEN: "refresh_token",
 };

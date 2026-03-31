@@ -1,11 +1,32 @@
+import { clearAuthSessionState } from "@services/authSession";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { router } from "expo-router";
+import { AuthResponse } from "../types/auth.types";
 import { API_BASE_URL, STORAGE_KEYS } from "../utils/constants";
-import { getToken, removeToken } from "./secureStorage";
+import {
+  getRefreshToken,
+  getToken,
+  removeRefreshToken,
+  removeToken,
+  saveRefreshToken,
+  saveToken,
+} from "./secureStorage";
 import { removeItem } from "./storage";
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
+
+interface RetriableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+const clearAuthSession = async () => {
+  await removeToken();
+  await removeRefreshToken();
+  await removeItem(STORAGE_KEYS.USER_DATA);
+  clearAuthSessionState();
+  router.replace("/(auth)/login");
+};
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -29,10 +50,43 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      await removeToken();
-      await removeItem(STORAGE_KEYS.USER_DATA);
-      router.replace("/(auth)/login");
+    const originalRequest = error.config as RetriableRequestConfig | undefined;
+
+    if (error.response?.status === 401 && originalRequest) {
+      const isRefreshRequest = originalRequest.url?.includes("refresh-token");
+
+      if (isRefreshRequest || originalRequest._retry) {
+        await clearAuthSession();
+      } else {
+        originalRequest._retry = true;
+
+        try {
+          const refreshToken = await getRefreshToken();
+
+          if (!refreshToken) {
+            throw new Error("Missing refresh token");
+          }
+
+          const refreshResponse = await api.post<AuthResponse>(
+            "api/v1/users/refresh-token",
+            { refreshToken },
+          );
+
+          const nextAccessToken = refreshResponse.data.data.accessToken;
+          if (!nextAccessToken) {
+            throw new Error("Refresh token response missing access token");
+          }
+
+          await saveToken(nextAccessToken);
+          if (refreshResponse.data.data.refreshToken) {
+            await saveRefreshToken(refreshResponse.data.data.refreshToken);
+          }
+
+          return api(originalRequest);
+        } catch (refreshError) {
+          await clearAuthSession();
+        }
+      }
     }
 
     const customError = {

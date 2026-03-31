@@ -37,6 +37,9 @@ npx expo run:ios
 - WebView bidirectional communication via postMessage/injectJavaScript
   (native sends course data to HTML, HTML sends completion events back
   to native)
+- WebView transport metadata also uses headers, then injectJavaScript
+  mirrors them into DOM state because react-native-webview does not
+  expose request headers directly to page scripts
 - SecureStore used only for auth token; all other persistence uses
   AsyncStorage (principle of least privilege for sensitive data)
 

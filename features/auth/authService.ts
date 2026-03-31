@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "@services/api";
-import { removeToken } from "@services/secureStorage";
+import { removeRefreshToken, removeToken } from "@services/secureStorage";
 import { removeItem } from "@services/storage";
 import { STORAGE_KEYS } from "@utils/constants";
 import { ApiResponse } from "../../types/api.types";
@@ -17,8 +17,7 @@ export const login = async (data: LoginRequest): Promise<AuthResponse> => {
 export const register = async (
   data: RegisterRequest,
 ): Promise<AuthResponse> => {
-  const response = await apiPost<AuthResponse>("api/v1/users/register", data);
-  return response;
+  return apiPost<AuthResponse>("api/v1/users/register", data);
 };
 
 export const getCurrentUser = async (): Promise<User> => {
@@ -31,5 +30,6 @@ export const logout = async (): Promise<void> => {
     await apiPost("api/v1/users/logout");
   } catch (err) {}
   await removeToken();
+  await removeRefreshToken();
   await removeItem(STORAGE_KEYS.USER_DATA);
 };

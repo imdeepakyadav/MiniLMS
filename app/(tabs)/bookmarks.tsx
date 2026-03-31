@@ -3,17 +3,12 @@ import { EmptyState } from "@components/ui/EmptyState";
 import { SkeletonCard } from "@components/ui/SkeletonCard";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
+import { LegendList } from "@legendapp/list";
 import { useCourseStore } from "@store/courseStore";
 import { COLORS, FONT_SIZE, FONT_WEIGHT, SPACING } from "@utils/theme";
 import { router } from "expo-router";
-import React, { useEffect } from "react";
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import React, { useCallback, useEffect } from "react";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BookmarksScreen() {
@@ -28,6 +23,17 @@ export default function BookmarksScreen() {
       void refetch();
     }
   }, [courses.length, refetch]);
+
+  const handleCoursePress = useCallback((courseId: string) => {
+    router.push(`/course/${courseId}`);
+  }, []);
+
+  const handleBookmarkToggle = useCallback(
+    (courseId: string) => {
+      void toggleBookmark(courseId);
+    },
+    [toggleBookmark],
+  );
 
   return (
     <SafeAreaView
@@ -48,18 +54,20 @@ export default function BookmarksScreen() {
           ))}
         </View>
       ) : (
-        <FlatList
+        <LegendList
           key={numColumns}
           data={bookmarkedCourses}
           numColumns={numColumns}
           columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
+          estimatedItemSize={120}
+          recycleItems
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.gridItem}>
               <CourseCard
                 course={item}
-                onPress={() => router.push(`/course/${item.id}`)}
-                onBookmarkToggle={() => toggleBookmark(item.id)}
+                onPress={() => handleCoursePress(item.id)}
+                onBookmarkToggle={() => handleBookmarkToggle(item.id)}
               />
             </View>
           )}

@@ -7,13 +7,13 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useDebounce } from "@hooks/useDebounce";
+import { LegendList } from "@legendapp/list";
 import { useAuthStore } from "@store/authStore";
 import { useCourseStore } from "@store/courseStore";
 import { COLORS, FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "@utils/theme";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  FlatList,
   RefreshControl,
   StyleSheet,
   Text,
@@ -24,19 +24,29 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const { courses, isLoading, error, refetch } = useCourses();
+  const { isLoading, error, refetch } = useCourses();
   const { toggleBookmark } = useBookmarks();
   const { user } = useAuthStore();
-  const { courses: allCourses, dispatch } = useCourseStore();
+  const { courses: allCourses } = useCourseStore();
   const [searchText, setSearchText] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const debouncedSearchText = useDebounce(searchText, 300);
   const { width, height } = useWindowDimensions();
   const numColumns = width > height ? 2 : 1;
 
-  useEffect(() => {
-    dispatch({ type: "SET_SEARCH_QUERY", payload: debouncedSearchText });
-  }, [debouncedSearchText, dispatch]);
+  const filteredCourses = useMemo(() => {
+    const normalizedQuery = debouncedSearchText.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return allCourses;
+    }
+
+    return allCourses.filter(
+      (course) =>
+        course.title.toLowerCase().includes(normalizedQuery) ||
+        course.instructorName.toLowerCase().includes(normalizedQuery),
+    );
+  }, [allCourses, debouncedSearchText]);
 
   useEffect(() => {
     if (!allCourses.length) {
@@ -44,11 +54,30 @@ export default function HomeScreen() {
     }
   }, [allCourses.length, refetch]);
 
-  const handleRefresh = async () => {
+  const handleCoursePress = useCallback((courseId: string) => {
+    router.push(`/course/${courseId}`);
+  }, []);
+
+  const handleBookmarkToggle = useCallback(
+    (courseId: string) => {
+      void toggleBookmark(courseId);
+    },
+    [toggleBookmark],
+  );
+
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await refetch();
-    setIsRefreshing(false);
-  };
+
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch]);
+
+  const clearSearch = useCallback(() => {
+    setSearchText("");
+  }, []);
 
   return (
     <SafeAreaView
@@ -97,18 +126,20 @@ export default function HomeScreen() {
           ))}
         </View>
       ) : (
-        <FlatList
+        <LegendList
           key={numColumns}
-          data={courses}
+          data={filteredCourses}
           numColumns={numColumns}
           columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
+          estimatedItemSize={120}
+          recycleItems
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.gridItem}>
               <CourseCard
                 course={item}
-                onPress={() => router.push(`/course/${item.id}`)}
-                onBookmarkToggle={() => toggleBookmark(item.id)}
+                onPress={() => handleCoursePress(item.id)}
+                onBookmarkToggle={() => handleBookmarkToggle(item.id)}
               />
             </View>
           )}
@@ -120,7 +151,7 @@ export default function HomeScreen() {
           }
           contentContainerStyle={[
             styles.listContent,
-            courses.length === 0 ? styles.emptyContent : null,
+            filteredCourses.length === 0 ? styles.emptyContent : null,
           ]}
           ListEmptyComponent={
             error ? null : (
@@ -129,7 +160,7 @@ export default function HomeScreen() {
                 title="No courses found"
                 subtitle="Try a different search term or refresh the catalog."
                 actionLabel={searchText ? "Clear search" : undefined}
-                onAction={searchText ? () => setSearchText("") : undefined}
+                onAction={searchText ? clearSearch : undefined}
               />
             )
           }

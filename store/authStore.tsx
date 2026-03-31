@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@features/auth/authService";
+import { registerLogoutDispatch } from "@services/authSession";
 import { getToken, removeToken } from "@services/secureStorage";
 import React, {
   createContext,
@@ -56,6 +57,12 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+
+  useEffect(() => {
+    registerLogoutDispatch(dispatch);
+
+    return () => registerLogoutDispatch(null);
+  }, [dispatch]);
 
   useEffect(() => {
     const bootstrapAsync = async () => {

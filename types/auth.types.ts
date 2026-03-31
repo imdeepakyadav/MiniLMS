@@ -21,7 +21,8 @@ export interface AuthResponse {
   statusCode: number;
   data: {
     user: User;
-    accessToken: string;
+    accessToken?: string;
+    refreshToken?: string;
   };
   message: string;
   success: boolean;
