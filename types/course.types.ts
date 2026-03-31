@@ -44,6 +44,27 @@ export interface CourseProgress {
   lastUpdated: number;
 }
 
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  lastActiveDate: string;
+  totalActiveDays: number;
+}
+
+export interface ActivityLog {
+  date: string;
+  lessonsCompleted: number;
+  coursesOpened: number;
+}
+
+export interface Badge {
+  id: string;
+  label: string;
+  description: string;
+  icon: string;
+  unlockedAt: number | null;
+}
+
 export interface WebViewMessage {
   type: "COURSE_COMPLETED";
   courseId: string;

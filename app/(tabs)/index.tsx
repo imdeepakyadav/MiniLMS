@@ -1,4 +1,5 @@
 import { CourseCard } from "@components/course/CourseCard";
+import { StreakCard } from "@components/streak/StreakCard";
 import { Button } from "@components/ui/Button";
 import { EmptyState } from "@components/ui/EmptyState";
 import { ErrorBanner } from "@components/ui/ErrorBanner";
@@ -6,6 +7,7 @@ import { SkeletonCard } from "@components/ui/SkeletonCard";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
+import { useStreak } from "@features/streak/useStreak";
 import { useDebounce } from "@hooks/useDebounce";
 import { LegendList } from "@legendapp/list";
 import { useAuthStore } from "@store/authStore";
@@ -25,6 +27,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -37,6 +40,7 @@ export default function HomeScreen() {
   const { toggleBookmark } = useBookmarks();
   const { user } = useAuthStore();
   const { courses: allCourses } = useCourseStore();
+  const { streakData } = useStreak();
   const [searchText, setSearchText] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const debouncedSearchText = useDebounce(searchText, 300);
@@ -98,9 +102,18 @@ export default function HomeScreen() {
           <Text style={styles.logoText}>MiniLMS</Text>
           <Text style={styles.subtitle}>Find something to learn today.</Text>
         </View>
-        <Text style={styles.greeting} numberOfLines={1}>
-          Hi, {user?.username ?? "Learner"} 👋
-        </Text>
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={() => router.push("/analytics")}>
+            <Ionicons
+              name="analytics-outline"
+              size={22}
+              color={colors.primary}
+            />
+          </TouchableOpacity>
+          <Text style={styles.greeting} numberOfLines={1}>
+            Hi, {user?.username ?? "Learner"} 👋
+          </Text>
+        </View>
       </View>
 
       <View style={styles.searchBar}>
@@ -118,6 +131,11 @@ export default function HomeScreen() {
           onChangeText={setSearchText}
         />
       </View>
+
+      <StreakCard
+        streakData={streakData}
+        onPress={() => router.push("/analytics")}
+      />
 
       {error ? (
         <View style={styles.errorBlock}>
@@ -211,8 +229,15 @@ const createStyles = (colors: AppTheme) =>
       fontWeight: FONT_WEIGHT.medium,
       textAlign: "right",
       flexShrink: 1,
-      marginLeft: SPACING.md,
+      marginLeft: SPACING.sm,
       marginTop: SPACING.xs,
+    },
+    headerRight: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: SPACING.sm,
+      flexShrink: 1,
+      marginLeft: SPACING.md,
     },
     searchBar: {
       flexDirection: "row",

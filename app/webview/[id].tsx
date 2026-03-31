@@ -4,6 +4,7 @@ import { Loader } from "@components/ui/Loader";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCourses } from "@features/courses/useCourses";
 import notificationService from "@features/notifications/notificationService";
+import { useStreak } from "@features/streak/useStreak";
 import { useCourseStore } from "@store/courseStore";
 import { useTheme } from "@store/themeStore";
 import {
@@ -38,6 +39,7 @@ export default function WebViewScreen() {
     isLoading: courseStoreLoading,
     dispatch,
   } = useCourseStore();
+  const { recordActivity } = useStreak();
   const { refetch } = useCourses();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -414,12 +416,19 @@ export default function WebViewScreen() {
         );
 
         dispatch({
+          type: "ENROLL_COURSE",
+          payload: data.courseId,
+        });
+
+        dispatch({
           type: "UPDATE_LESSON_PROGRESS",
           payload: {
             courseId: data.courseId,
             lessonIndex: data.lessonIndex,
           },
         });
+
+        void recordActivity("lesson");
 
         if (nextPercentage === 100 && (courseProgress?.percentage ?? 0) < 100) {
           Alert.alert("🎉 Course Complete!", "You've finished all lessons.");
@@ -551,7 +560,9 @@ export default function WebViewScreen() {
             injectProgress();
           }}
           onMessage={handleMessage}
-          onError={(syntheticEvent: any) => {
+          onError={(syntheticEvent: {
+            nativeEvent: { description?: string };
+          }) => {
             setError(
               syntheticEvent.nativeEvent.description ??
                 "Failed to load course content",
@@ -586,60 +597,6 @@ export default function WebViewScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  headerButton: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-  },
-  webViewContainer: {
-    flex: 1,
-  },
-  webView: {
-    flex: 1,
-  },
-  loadingWrapper: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(15, 23, 42, 0.42)",
-  },
-  errorOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: SPACING.lg,
-  },
-  errorState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: SPACING.lg,
-  },
-  errorIcon: {
-    marginBottom: SPACING.md,
-  },
-  errorTitle: {
-    fontSize: FONT_SIZE.lg,
-    fontWeight: FONT_WEIGHT.bold,
-    textAlign: "center",
-    marginBottom: SPACING.sm,
-  },
-  errorDescription: {
-    fontSize: FONT_SIZE.sm,
-    textAlign: "center",
-    marginBottom: SPACING.lg,
-    maxWidth: 320,
-  },
-});
 
 const createStyles = (colors: AppTheme) =>
   StyleSheet.create({
