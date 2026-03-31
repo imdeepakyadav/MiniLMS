@@ -1,5 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { COLORS, FONT_SIZE, RADIUS, SPACING } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
+import { AppTheme, FONT_SIZE, RADIUS, SPACING } from "@utils/theme";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -12,6 +13,9 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
   message,
   onDismiss,
 }) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>{message}</Text>
@@ -21,29 +25,30 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
           hitSlop={10}
           style={styles.closeBtn}
         >
-          <Ionicons name="close" size={18} color={COLORS.onPrimary} />
+          <Ionicons name="close" size={18} color={colors.onPrimary} />
         </TouchableOpacity>
       )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    backgroundColor: COLORS.error,
-    padding: SPACING.md,
-    borderRadius: RADIUS.md,
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginVertical: SPACING.sm,
-    width: "100%",
-  },
-  text: {
-    color: COLORS.onPrimary,
-    fontSize: FONT_SIZE.sm,
-    flex: 1,
-    marginRight: SPACING.sm,
-  },
-  closeBtn: { padding: 2 },
-});
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      backgroundColor: colors.error,
+      padding: SPACING.md,
+      borderRadius: RADIUS.md,
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginVertical: SPACING.sm,
+      width: "100%",
+    },
+    text: {
+      color: colors.onPrimary,
+      fontSize: FONT_SIZE.sm,
+      flex: 1,
+      marginRight: SPACING.sm,
+    },
+    closeBtn: { padding: 2 },
+  });

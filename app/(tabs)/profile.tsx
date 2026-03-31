@@ -1,13 +1,21 @@
 import { Button } from "@components/ui/Button";
 import { EmptyState } from "@components/ui/EmptyState";
+import { ThemeToggle } from "@components/ui/ThemeToggle";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  getBiometricType,
+  isBiometricAvailable,
+  isBiometricEnabled,
+  setBiometricEnabled,
+} from "@features/auth/biometricService";
 import { useAuth } from "@features/auth/useAuth";
 import { getItem, setItem } from "@services/storage";
 import { useAuthStore } from "@store/authStore";
 import { useCourseStore } from "@store/courseStore";
+import { useTheme } from "@store/themeStore";
 import { STORAGE_KEYS } from "@utils/constants";
 import {
-  COLORS,
+  AppTheme,
   DIMENSIONS,
   FONT_SIZE,
   FONT_WEIGHT,
@@ -23,6 +31,7 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -32,10 +41,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const PROFILE_IMAGE_MAX_SIZE = DIMENSIONS.avatarLarge;
 
 export default function ProfileScreen() {
+  const { colors, mode, toggleTheme } = useTheme();
+  const styles = createStyles(colors);
   const { user } = useAuthStore();
   const { logout, isLoading } = useAuth();
   const { bookmarks, enrolledCourses } = useCourseStore();
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+  const [biometricSupported, setBiometricSupported] = useState(false);
+  const [biometricType, setBiometricType] = useState("Biometric");
+  const [biometricEnabledState, setBiometricEnabledState] = useState(false);
 
   useEffect(() => {
     const loadProfileImage = async () => {
@@ -48,6 +62,27 @@ export default function ProfileScreen() {
     };
 
     void loadProfileImage();
+  }, []);
+
+  useEffect(() => {
+    const loadBiometricSettings = async () => {
+      const available = await isBiometricAvailable();
+      setBiometricSupported(available);
+
+      if (!available) {
+        return;
+      }
+
+      const [type, enabled] = await Promise.all([
+        getBiometricType(),
+        isBiometricEnabled(),
+      ]);
+
+      setBiometricType(type);
+      setBiometricEnabledState(enabled);
+    };
+
+    void loadBiometricSettings();
   }, []);
 
   const joinDate = useMemo(() => {
@@ -102,6 +137,33 @@ export default function ProfileScreen() {
         },
       },
     ]);
+  };
+
+  const handleAppearanceToggle = () => {
+    toggleTheme();
+  };
+
+  const handleBiometricToggle = (nextValue: boolean) => {
+    if (!nextValue) {
+      void setBiometricEnabled(false);
+      setBiometricEnabledState(false);
+      return;
+    }
+
+    Alert.alert(
+      "Enable biometric sign in?",
+      `This will allow you to sign in using ${biometricType}. Continue?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Enable",
+          onPress: () => {
+            void setBiometricEnabled(true);
+            setBiometricEnabledState(true);
+          },
+        },
+      ],
+    );
   };
 
   const initial = user?.username?.trim().charAt(0).toUpperCase() ?? "?";
@@ -169,13 +231,56 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        <View style={styles.settingsCard}>
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelRow}>
+              <Ionicons
+                name={mode === "dark" ? "moon-outline" : "sunny-outline"}
+                size={ICON_SIZE.sm}
+                color={colors.primary}
+              />
+              <Text style={styles.settingLabel}>Appearance</Text>
+            </View>
+            <ThemeToggle
+              value={mode === "dark"}
+              onToggle={handleAppearanceToggle}
+            />
+          </View>
+
+          {biometricSupported ? (
+            <View style={styles.settingRow}>
+              <View style={styles.settingLabelRow}>
+                <Ionicons
+                  name="finger-print"
+                  size={ICON_SIZE.sm}
+                  color={colors.primary}
+                />
+                <Text style={styles.settingLabel}>
+                  Sign in with {biometricType}
+                </Text>
+              </View>
+              <Switch
+                value={biometricEnabledState}
+                onValueChange={handleBiometricToggle}
+                trackColor={{
+                  false: colors.border,
+                  true: colors.primary,
+                }}
+                thumbColor={
+                  biometricEnabledState ? colors.onPrimary : "#FFFFFF"
+                }
+              />
+            </View>
+          ) : null}
+        </View>
+
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
             <View style={styles.infoLabelRow}>
               <Ionicons
                 name="calendar-outline"
                 size={ICON_SIZE.sm}
-                color={COLORS.primary}
+                color={colors.primary}
               />
               <Text style={styles.infoLabel}>Member since</Text>
             </View>
@@ -186,7 +291,7 @@ export default function ProfileScreen() {
               <Ionicons
                 name="mail-outline"
                 size={ICON_SIZE.sm}
-                color={COLORS.primary}
+                color={colors.primary}
               />
               <Text style={styles.infoLabel}>Email</Text>
             </View>
@@ -208,122 +313,150 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-  },
-  content: {
-    flexGrow: 1,
-    justifyContent: "space-between",
-    paddingBottom: SPACING.lg,
-  },
-  avatarContainer: {
-    alignItems: "center",
-    marginBottom: SPACING.md,
-  },
-  avatarImage: {
-    width: PROFILE_IMAGE_MAX_SIZE,
-    height: PROFILE_IMAGE_MAX_SIZE,
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.surface,
-  },
-  initialAvatar: {
-    width: PROFILE_IMAGE_MAX_SIZE,
-    height: PROFILE_IMAGE_MAX_SIZE,
-    borderRadius: RADIUS.full,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.primary,
-  },
-  initialText: {
-    color: COLORS.onPrimary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: FONT_WEIGHT.bold,
-  },
-  photoButton: {
-    alignSelf: "center",
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.lg,
-  },
-  photoButtonText: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: FONT_WEIGHT.semibold,
-  },
-  username: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: FONT_WEIGHT.bold,
-    textAlign: "center",
-  },
-  email: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    textAlign: "center",
-    marginTop: SPACING.xs,
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: SPACING.md,
-    marginTop: SPACING.xl,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    paddingVertical: SPACING.lg,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statValue: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.xs,
-  },
-  statLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-  },
-  infoCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    marginTop: SPACING.xl,
-    overflow: "hidden",
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.border,
-  },
-  infoLabelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    marginRight: SPACING.md,
-  },
-  infoLabel: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: FONT_WEIGHT.medium,
-    marginLeft: SPACING.sm,
-  },
-  infoValue: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    textAlign: "right",
-    flexShrink: 1,
-  },
-  footer: {
-    marginTop: SPACING.xl,
-    paddingBottom: SPACING.sm,
-  },
-});
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+    },
+    content: {
+      flexGrow: 1,
+      justifyContent: "space-between",
+      paddingBottom: SPACING.lg,
+    },
+    avatarContainer: {
+      alignItems: "center",
+      marginBottom: SPACING.md,
+    },
+    avatarImage: {
+      width: PROFILE_IMAGE_MAX_SIZE,
+      height: PROFILE_IMAGE_MAX_SIZE,
+      borderRadius: RADIUS.full,
+      backgroundColor: colors.surface,
+    },
+    initialAvatar: {
+      width: PROFILE_IMAGE_MAX_SIZE,
+      height: PROFILE_IMAGE_MAX_SIZE,
+      borderRadius: RADIUS.full,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.primary,
+    },
+    initialText: {
+      color: colors.onPrimary,
+      fontSize: FONT_SIZE.xxl,
+      fontWeight: FONT_WEIGHT.bold,
+    },
+    photoButton: {
+      alignSelf: "center",
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      marginBottom: SPACING.lg,
+    },
+    photoButtonText: {
+      color: colors.primary,
+      fontSize: FONT_SIZE.sm,
+      fontWeight: FONT_WEIGHT.semibold,
+    },
+    username: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.xxl,
+      fontWeight: FONT_WEIGHT.bold,
+      textAlign: "center",
+    },
+    email: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.sm,
+      textAlign: "center",
+      marginTop: SPACING.xs,
+    },
+    statsRow: {
+      flexDirection: "row",
+      gap: SPACING.md,
+      marginTop: SPACING.xl,
+    },
+    statCard: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      paddingVertical: SPACING.lg,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    statValue: {
+      color: colors.primary,
+      fontSize: FONT_SIZE.xxl,
+      fontWeight: FONT_WEIGHT.bold,
+      marginBottom: SPACING.xs,
+    },
+    statLabel: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.sm,
+    },
+    settingsCard: {
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      marginTop: SPACING.xl,
+      overflow: "hidden",
+    },
+    settingRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    settingLabelRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+      marginRight: SPACING.md,
+    },
+    settingLabel: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.sm,
+      fontWeight: FONT_WEIGHT.medium,
+      marginLeft: SPACING.sm,
+    },
+    infoCard: {
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      marginTop: SPACING.xl,
+      overflow: "hidden",
+    },
+    infoRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    infoLabelRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+      marginRight: SPACING.md,
+    },
+    infoLabel: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.sm,
+      fontWeight: FONT_WEIGHT.medium,
+      marginLeft: SPACING.sm,
+    },
+    infoValue: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.sm,
+      textAlign: "right",
+      flexShrink: 1,
+    },
+    footer: {
+      marginTop: SPACING.xl,
+      paddingBottom: SPACING.sm,
+    },
+  });

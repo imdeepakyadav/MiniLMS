@@ -1,4 +1,4 @@
-import { COLORS } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
@@ -7,13 +7,12 @@ interface LoaderProps {
   color?: string;
 }
 
-export const Loader: React.FC<LoaderProps> = ({
-  size = "large",
-  color = COLORS.primary,
-}) => {
+export const Loader: React.FC<LoaderProps> = ({ size = "large", color }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
-      <ActivityIndicator size={size} color={color} />
+      <ActivityIndicator size={size} color={color ?? colors.primary} />
     </View>
   );
 };

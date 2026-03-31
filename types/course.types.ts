@@ -28,7 +28,7 @@ export interface RawProduct {
 export type RawUser = any;
 
 export interface CourseDetailPayload {
-  type: 'COURSE_DATA';
+  type: "COURSE_DATA";
   payload: {
     courseId: string;
     title: string;
@@ -36,7 +36,21 @@ export interface CourseDetailPayload {
   };
 }
 
-export interface WebViewMessage {
-  type: 'COURSE_COMPLETED';
+export interface CourseProgress {
   courseId: string;
+  totalLessons: number;
+  completedLessons: number[];
+  percentage: number;
+  lastUpdated: number;
+}
+
+export interface WebViewMessage {
+  type: "COURSE_COMPLETED";
+  courseId: string;
+}
+
+export interface LessonCompletedMessage {
+  type: "LESSON_COMPLETED";
+  courseId: string;
+  lessonIndex: number;
 }

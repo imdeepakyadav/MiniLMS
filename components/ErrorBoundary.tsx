@@ -1,6 +1,7 @@
 import { Button } from "@components/ui/Button";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { COLORS, FONT_SIZE, FONT_WEIGHT, SPACING } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
+import { AppTheme, FONT_SIZE, FONT_WEIGHT, SPACING } from "@utils/theme";
 import * as Updates from "expo-updates";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -14,8 +15,12 @@ interface ErrorBoundaryProps {
   children: React.ReactNode;
 }
 
-export class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
+interface ThemedErrorBoundaryProps extends ErrorBoundaryProps {
+  colors: AppTheme;
+}
+
+class ErrorBoundaryBase extends React.Component<
+  ThemedErrorBoundaryProps,
   ErrorBoundaryState
 > {
   state: ErrorBoundaryState = {
@@ -44,12 +49,15 @@ export class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
+      const { colors } = this.props;
+      const styles = createStyles(colors);
+
       return (
         <View style={styles.container}>
           <Ionicons
             name="warning-outline"
             size={44}
-            color={COLORS.warning}
+            color={colors.warning}
             style={styles.icon}
           />
           <Text style={styles.title}>Something went wrong</Text>
@@ -65,29 +73,36 @@ export class ErrorBoundary extends React.Component<
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: SPACING.lg,
-  },
-  icon: {
-    marginBottom: SPACING.md,
-  },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xl,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.sm,
-    textAlign: "center",
-  },
-  message: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.md,
-    textAlign: "center",
-    marginBottom: SPACING.lg,
-    maxWidth: 320,
-  },
-});
+export const ErrorBoundary = ({ children }: ErrorBoundaryProps) => {
+  const { colors } = useTheme();
+
+  return <ErrorBoundaryBase colors={colors}>{children}</ErrorBoundaryBase>;
+};
+
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: SPACING.lg,
+    },
+    icon: {
+      marginBottom: SPACING.md,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.xl,
+      fontWeight: FONT_WEIGHT.bold,
+      marginBottom: SPACING.sm,
+      textAlign: "center",
+    },
+    message: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.md,
+      textAlign: "center",
+      marginBottom: SPACING.lg,
+      maxWidth: 320,
+    },
+  });

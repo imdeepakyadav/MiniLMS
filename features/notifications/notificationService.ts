@@ -98,8 +98,36 @@ export const scheduleReEngagementNotification = async (): Promise<boolean> => {
   }
 };
 
+export const scheduleCourseCompletedNotification = async (
+  courseTitle: string,
+): Promise<boolean> => {
+  if (!notificationPermissionGranted) {
+    return false;
+  }
+
+  try {
+    const notifications = await loadNotificationsModule();
+    if (!notifications) {
+      return false;
+    }
+
+    await notifications.scheduleNotificationAsync({
+      content: {
+        title: "Course Completed! 🎓",
+        body: `You finished "${courseTitle}". Keep it up!`,
+      },
+      trigger: null,
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export default {
   requestPermissions,
   scheduleBookmarkMilestoneNotification,
   scheduleReEngagementNotification,
+  scheduleCourseCompletedNotification,
 };

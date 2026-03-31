@@ -4,13 +4,15 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import useNetworkStatus from "@hooks/useNetworkStatus";
 import { useAuthStore } from "@store/authStore";
 import { useCourseStore } from "@store/courseStore";
-import { COLORS, DIMENSIONS, FONT_SIZE, FONT_WEIGHT } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
+import { DIMENSIONS, FONT_SIZE, FONT_WEIGHT } from "@utils/theme";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
+  const { colors } = useTheme();
   const { isAuthenticated, isLoading } = useAuthStore();
   const { isConnected } = useNetworkStatus();
   const { bookmarks } = useCourseStore();
@@ -22,7 +24,7 @@ export default function TabsLayout() {
         edges={["top", "left", "right", "bottom"]}
       >
         <View style={styles.loadingInner}>
-          <Loader color={COLORS.primary} size="large" />
+          <Loader color={colors.primary} size="large" />
         </View>
       </SafeAreaView>
     );
@@ -38,10 +40,10 @@ export default function TabsLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: COLORS.primary,
-          tabBarInactiveTintColor: COLORS.textSecondary,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.textSecondary,
           tabBarStyle: {
-            backgroundColor: COLORS.surface,
+            backgroundColor: colors.tabBar,
             borderTopWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
@@ -52,8 +54,8 @@ export default function TabsLayout() {
             fontWeight: FONT_WEIGHT.semibold,
           },
           tabBarBadgeStyle: {
-            backgroundColor: COLORS.primary,
-            color: COLORS.onPrimary,
+            backgroundColor: colors.primary,
+            color: colors.onPrimary,
             fontSize: FONT_SIZE.xs,
             fontWeight: FONT_WEIGHT.bold,
           },
@@ -98,7 +100,6 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   loadingInner: {
     flex: 1,

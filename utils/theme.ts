@@ -1,17 +1,43 @@
-export const COLORS = {
-  primary: "#6366F1",
-  accent: "#22C55E",
+export const darkTheme = {
   background: "#0F172A",
   surface: "#1E293B",
+  surfaceElevated: "#263548",
   textPrimary: "#F8FAFC",
   textSecondary: "#94A3B8",
+  primary: "#6366F1",
+  primaryMuted: "#4F46E5",
+  accent: "#22C55E",
   error: "#EF4444",
   warning: "#F59E0B",
   border: "#334155",
+  tabBar: "#1E293B",
+  card: "#1E293B",
   onPrimary: "#FFFFFF",
   skeletonBase: "#334155",
   skeletonShimmer: "rgba(255, 255, 255, 0.08)",
 };
+
+export const lightTheme = {
+  background: "#F8FAFC",
+  surface: "#FFFFFF",
+  surfaceElevated: "#F1F5F9",
+  textPrimary: "#0F172A",
+  textSecondary: "#64748B",
+  primary: "#6366F1",
+  primaryMuted: "#818CF8",
+  accent: "#16A34A",
+  error: "#DC2626",
+  warning: "#D97706",
+  border: "#E2E8F0",
+  tabBar: "#FFFFFF",
+  card: "#FFFFFF",
+  onPrimary: "#FFFFFF",
+  skeletonBase: "#CBD5E1",
+  skeletonShimmer: "rgba(15, 23, 42, 0.08)",
+};
+
+export type AppTheme = typeof darkTheme;
+export type ThemeMode = "dark" | "light";
 
 export const SPACING = {
   xs: 4,

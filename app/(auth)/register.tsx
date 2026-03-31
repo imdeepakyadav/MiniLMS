@@ -1,7 +1,14 @@
 import { Button } from "@components/ui/Button";
 import { ErrorBanner } from "@components/ui/ErrorBanner";
 import { useAuth } from "@features/auth/useAuth";
-import { COLORS, FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
+import {
+  AppTheme,
+  FONT_SIZE,
+  FONT_WEIGHT,
+  RADIUS,
+  SPACING,
+} from "@utils/theme";
 import { Link, router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -24,6 +31,8 @@ type ValidationErrors = Partial<{
 }>;
 
 export default function RegisterScreen() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -103,7 +112,7 @@ export default function RegisterScreen() {
                   validationErrors.username ? styles.inputError : null,
                 ]}
                 placeholder="Choose a username"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={colors.textSecondary}
                 value={username}
                 onChangeText={(text) => {
                   setUsername(text);
@@ -129,7 +138,7 @@ export default function RegisterScreen() {
                   validationErrors.email ? styles.inputError : null,
                 ]}
                 placeholder="Enter your email"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -155,7 +164,7 @@ export default function RegisterScreen() {
                   validationErrors.password ? styles.inputError : null,
                 ]}
                 placeholder="Create a password"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={colors.textSecondary}
                 secureTextEntry
                 value={password}
                 onChangeText={(text) => {
@@ -182,7 +191,7 @@ export default function RegisterScreen() {
                   validationErrors.confirmPassword ? styles.inputError : null,
                 ]}
                 placeholder="Re-enter your password"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={colors.textSecondary}
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={(text) => {
@@ -226,55 +235,56 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.xl,
-  },
-  header: { alignItems: "center", marginBottom: SPACING.xl },
-  title: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.xs,
-  },
-  subtitle: { color: COLORS.textSecondary, fontSize: FONT_SIZE.md },
-  formContainer: { width: "100%" },
-  inputGroup: { marginBottom: SPACING.md },
-  label: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    marginBottom: SPACING.xs,
-    fontWeight: FONT_WEIGHT.medium,
-  },
-  input: {
-    backgroundColor: COLORS.surface,
-    color: COLORS.textPrimary,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    fontSize: FONT_SIZE.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  inputError: { borderColor: COLORS.error },
-  errorText: {
-    color: COLORS.error,
-    fontSize: FONT_SIZE.xs,
-    marginTop: SPACING.xs,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: SPACING.lg,
-  },
-  footerText: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm },
-  footerLink: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: FONT_WEIGHT.bold,
-  },
-});
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    scrollContainer: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.xl,
+    },
+    header: { alignItems: "center", marginBottom: SPACING.xl },
+    title: {
+      color: colors.primary,
+      fontSize: FONT_SIZE.xxl,
+      fontWeight: FONT_WEIGHT.bold,
+      marginBottom: SPACING.xs,
+    },
+    subtitle: { color: colors.textSecondary, fontSize: FONT_SIZE.md },
+    formContainer: { width: "100%" },
+    inputGroup: { marginBottom: SPACING.md },
+    label: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.sm,
+      marginBottom: SPACING.xs,
+      fontWeight: FONT_WEIGHT.medium,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      color: colors.textPrimary,
+      borderRadius: RADIUS.md,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      fontSize: FONT_SIZE.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    inputError: { borderColor: colors.error },
+    errorText: {
+      color: colors.error,
+      fontSize: FONT_SIZE.xs,
+      marginTop: SPACING.xs,
+    },
+    footer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      marginTop: SPACING.lg,
+    },
+    footerText: { color: colors.textSecondary, fontSize: FONT_SIZE.sm },
+    footerLink: {
+      color: colors.primary,
+      fontSize: FONT_SIZE.sm,
+      fontWeight: FONT_WEIGHT.bold,
+    },
+  });

@@ -3,14 +3,24 @@ import notificationService from "@features/notifications/notificationService";
 import { getItem, setItem } from "@services/storage";
 import { AuthProvider } from "@store/authStore";
 import { CourseStoreProvider } from "@store/courseStore";
+import { ThemeProvider, useTheme } from "@store/themeStore";
 import { STORAGE_KEYS } from "@utils/constants";
-import { COLORS } from "@utils/theme";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootShell />
+    </ThemeProvider>
+  );
+}
+
+function RootShell() {
+  const { colors, mode } = useTheme();
+
   useEffect(() => {
     const bootstrapNotifications = async () => {
       try {
@@ -38,15 +48,15 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: COLORS.background }}>
+    <SafeAreaProvider style={{ backgroundColor: colors.background }}>
       <ErrorBoundary>
         <AuthProvider>
           <CourseStoreProvider>
-            <StatusBar style="light" />
+            <StatusBar style={mode === "dark" ? "light" : "dark"} />
             <Stack
               screenOptions={{
                 headerShown: false,
-                contentStyle: { backgroundColor: COLORS.background },
+                contentStyle: { backgroundColor: colors.background },
               }}
             >
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

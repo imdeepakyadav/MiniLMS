@@ -1,4 +1,5 @@
-import { COLORS, FONT_SIZE, RADIUS, SPACING } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
+import { AppTheme, FONT_SIZE, RADIUS, SPACING } from "@utils/theme";
 import React from "react";
 import {
   ActivityIndicator,
@@ -24,6 +25,9 @@ export const Button: React.FC<ButtonProps> = ({
   variant = "primary",
   tone = "default",
 }) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   const getContainerStyle = () => {
     switch (variant) {
       case "outline":
@@ -71,7 +75,7 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === "primary" ? COLORS.onPrimary : COLORS.primary}
+          color={variant === "primary" ? colors.onPrimary : colors.primary}
         />
       ) : (
         <Text style={getTextStyle()}>{label}</Text>
@@ -80,32 +84,33 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: SPACING.sm,
-  },
-  primaryContainer: { backgroundColor: COLORS.primary },
-  outlineContainer: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-  },
-  dangerOutlineContainer: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: COLORS.error,
-  },
-  ghostContainer: { backgroundColor: "transparent" },
-  dangerGhostContainer: { backgroundColor: "transparent" },
-  disabled: { opacity: 0.5 },
-  text: { fontSize: FONT_SIZE.md, fontWeight: "600" },
-  primaryText: { color: COLORS.onPrimary },
-  outlineText: { color: COLORS.primary },
-  ghostText: { color: COLORS.primary },
-  dangerText: { color: COLORS.error },
-});
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      width: "100%",
+      paddingVertical: SPACING.md,
+      borderRadius: RADIUS.md,
+      alignItems: "center",
+      justifyContent: "center",
+      marginVertical: SPACING.sm,
+    },
+    primaryContainer: { backgroundColor: colors.primary },
+    outlineContainer: {
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: colors.primary,
+    },
+    dangerOutlineContainer: {
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: colors.error,
+    },
+    ghostContainer: { backgroundColor: "transparent" },
+    dangerGhostContainer: { backgroundColor: "transparent" },
+    disabled: { opacity: 0.5 },
+    text: { fontSize: FONT_SIZE.md, fontWeight: "600" },
+    primaryText: { color: colors.onPrimary },
+    outlineText: { color: colors.primary },
+    ghostText: { color: colors.primary },
+    dangerText: { color: colors.error },
+  });

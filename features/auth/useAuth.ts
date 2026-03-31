@@ -1,14 +1,21 @@
 import { saveRefreshToken, saveToken } from "@services/secureStorage";
-import { setItem } from "@services/storage";
+import { getItem, setItem } from "@services/storage";
 import { useAuthStore } from "@store/authStore";
 import { STORAGE_KEYS } from "@utils/constants";
 import { useState } from "react";
+import { Alert } from "react-native";
 import {
   AuthResponse,
   LoginRequest,
   RegisterRequest,
 } from "../../types/auth.types";
 import * as authService from "./authService";
+import {
+  getBiometricType,
+  isBiometricAvailable,
+  isBiometricEnabled,
+  setBiometricEnabled,
+} from "./biometricService";
 
 export const useAuth = () => {
   const { dispatch } = useAuthStore();
@@ -16,6 +23,37 @@ export const useAuth = () => {
   const [error, setError] = useState<string | null>(null);
 
   const clearError = () => setError(null);
+
+  const maybePromptBiometricSetup = async () => {
+    const [available, enabled, promptShown] = await Promise.all([
+      isBiometricAvailable(),
+      isBiometricEnabled(),
+      getItem<boolean>(STORAGE_KEYS.BIOMETRIC_PROMPT_SHOWN),
+    ]);
+
+    if (!available || enabled || promptShown) {
+      return;
+    }
+
+    const biometricType = await getBiometricType();
+    await setItem(STORAGE_KEYS.BIOMETRIC_PROMPT_SHOWN, true);
+
+    setTimeout(() => {
+      Alert.alert(
+        `Enable ${biometricType} for faster sign in next time?`,
+        "You can turn this on now and skip password entry later.",
+        [
+          { text: "Not Now", style: "cancel" },
+          {
+            text: "Enable",
+            onPress: () => {
+              void setBiometricEnabled(true);
+            },
+          },
+        ],
+      );
+    }, 1000);
+  };
 
   const persistSession = async (response: AuthResponse) => {
     const { user, accessToken, refreshToken } = response.data;
@@ -39,6 +77,7 @@ export const useAuth = () => {
     try {
       const response = await authService.login(data);
       await persistSession(response);
+      void maybePromptBiometricSetup();
       return true;
     } catch (err: any) {
       setError(err.message || "Login failed");

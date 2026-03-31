@@ -31,6 +31,13 @@
       "expo-router",
       "expo-secure-store",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "17b10f7d-5724-4488-89bf-d77a2c9e494d"
+      }
+    },
+    "owner": "imdeepakyadav"
   }
 }

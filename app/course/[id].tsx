@@ -2,12 +2,14 @@ import { Button } from "@components/ui/Button";
 import { EmptyState } from "@components/ui/EmptyState";
 import { ErrorBanner } from "@components/ui/ErrorBanner";
 import { Loader } from "@components/ui/Loader";
+import { ProgressRing } from "@components/ui/ProgressRing";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBookmarks } from "@features/courses/useBookmarks";
 import { useCourses } from "@features/courses/useCourses";
 import { useCourseStore } from "@store/courseStore";
+import { useTheme } from "@store/themeStore";
 import {
-  COLORS,
+  AppTheme,
   DIMENSIONS,
   FONT_SIZE,
   FONT_WEIGHT,
@@ -28,10 +30,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CourseDetailsScreen() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const params = useLocalSearchParams<{ id?: string }>();
   const courseId = Array.isArray(params.id) ? params.id[0] : params.id;
   const { courses, isLoading, error, refetch } = useCourses();
-  const { enrolledCourses, dispatch } = useCourseStore();
+  const { enrolledCourses, progress, dispatch } = useCourseStore();
   const { toggleBookmark, isBookmarked } = useBookmarks();
 
   useEffect(() => {
@@ -42,6 +46,7 @@ export default function CourseDetailsScreen() {
 
   const course = courses.find((item) => item.id === courseId);
   const isEnrolled = courseId ? enrolledCourses.includes(courseId) : false;
+  const courseProgress = courseId ? progress[courseId] : undefined;
 
   const handleEnroll = () => {
     if (!courseId || isEnrolled) {
@@ -69,8 +74,8 @@ export default function CourseDetailsScreen() {
           options={{
             headerShown: true,
             title: "Course Detail",
-            headerStyle: { backgroundColor: COLORS.background },
-            headerTintColor: COLORS.textPrimary,
+            headerStyle: { backgroundColor: colors.background },
+            headerTintColor: colors.textPrimary,
           }}
         />
         {error ? <ErrorBanner message={error} onDismiss={refetch} /> : null}
@@ -94,8 +99,8 @@ export default function CourseDetailsScreen() {
         options={{
           headerShown: true,
           title: "",
-          headerStyle: { backgroundColor: COLORS.background },
-          headerTintColor: COLORS.textPrimary,
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.textPrimary,
           headerShadowVisible: false,
           headerLeft: () => (
             <TouchableOpacity
@@ -105,7 +110,7 @@ export default function CourseDetailsScreen() {
               <Ionicons
                 name="arrow-back"
                 size={ICON_SIZE.md}
-                color={COLORS.textPrimary}
+                color={colors.textPrimary}
               />
             </TouchableOpacity>
           ),
@@ -117,7 +122,7 @@ export default function CourseDetailsScreen() {
               <Ionicons
                 name={isBookmarked(course.id) ? "star" : "star-outline"}
                 size={ICON_SIZE.md}
-                color={COLORS.primary}
+                color={colors.primary}
               />
             </TouchableOpacity>
           ),
@@ -129,6 +134,19 @@ export default function CourseDetailsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Image source={{ uri: course.thumbnail }} style={styles.thumbnail} />
+
+        <View style={styles.progressBlock}>
+          <ProgressRing
+            percentage={courseProgress?.percentage ?? 0}
+            size={104}
+            strokeWidth={10}
+            color={colors.accent}
+          />
+          <Text style={styles.progressText}>
+            {courseProgress?.completedLessons.length ?? 0} of 5 lessons
+            completed
+          </Text>
+        </View>
 
         <View style={styles.content}>
           <Text style={styles.title}>{course.title}</Text>
@@ -176,121 +194,131 @@ export default function CourseDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  loaderContainer: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerAction: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-  },
-  headerActionText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: FONT_WEIGHT.bold,
-  },
-  scrollContent: {
-    paddingBottom: DIMENSIONS.detailFooterOffset,
-  },
-  thumbnail: {
-    width: "100%",
-    height: DIMENSIONS.courseThumbnailHeight,
-    backgroundColor: COLORS.surface,
-  },
-  content: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-  },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xl,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.md,
-  },
-  instructorRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.md,
-  },
-  avatar: {
-    width: DIMENSIONS.courseDetailAvatar,
-    height: DIMENSIONS.courseDetailAvatar,
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.border,
-    marginRight: SPACING.sm,
-  },
-  instructorName: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    fontWeight: FONT_WEIGHT.semibold,
-  },
-  instructorLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.xs,
-  },
-  priceBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: COLORS.accent,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: RADIUS.full,
-    marginBottom: SPACING.md,
-  },
-  priceText: {
-    color: COLORS.background,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: FONT_WEIGHT.bold,
-  },
-  description: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.md,
-    lineHeight: 24,
-  },
-  footer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.sm,
-    paddingBottom: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  enrollButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.md,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: SPACING.md,
-    marginBottom: SPACING.sm,
-  },
-  enrolledButton: {
-    backgroundColor: COLORS.accent,
-  },
-  enrollButtonText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    fontWeight: FONT_WEIGHT.bold,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: SPACING.lg,
-  },
-  emptyTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.md,
-  },
-});
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    loaderContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    headerAction: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+    },
+    headerActionText: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.lg,
+      fontWeight: FONT_WEIGHT.bold,
+    },
+    scrollContent: {
+      paddingBottom: DIMENSIONS.detailFooterOffset,
+    },
+    thumbnail: {
+      width: "100%",
+      height: DIMENSIONS.courseThumbnailHeight,
+      backgroundColor: colors.surface,
+    },
+    progressBlock: {
+      alignItems: "center",
+      paddingTop: SPACING.lg,
+    },
+    progressText: {
+      marginTop: SPACING.sm,
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.sm,
+    },
+    content: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.xl,
+      fontWeight: FONT_WEIGHT.bold,
+      marginBottom: SPACING.md,
+    },
+    instructorRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: SPACING.md,
+    },
+    avatar: {
+      width: DIMENSIONS.courseDetailAvatar,
+      height: DIMENSIONS.courseDetailAvatar,
+      borderRadius: RADIUS.full,
+      backgroundColor: colors.border,
+      marginRight: SPACING.sm,
+    },
+    instructorName: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.md,
+      fontWeight: FONT_WEIGHT.semibold,
+    },
+    instructorLabel: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.xs,
+    },
+    priceBadge: {
+      alignSelf: "flex-start",
+      backgroundColor: colors.accent,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.xs,
+      borderRadius: RADIUS.full,
+      marginBottom: SPACING.md,
+    },
+    priceText: {
+      color: colors.background,
+      fontSize: FONT_SIZE.sm,
+      fontWeight: FONT_WEIGHT.bold,
+    },
+    description: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.md,
+      lineHeight: 24,
+    },
+    footer: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.background,
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.sm,
+      paddingBottom: SPACING.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    enrollButton: {
+      backgroundColor: colors.primary,
+      borderRadius: RADIUS.md,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: SPACING.md,
+      marginBottom: SPACING.sm,
+    },
+    enrolledButton: {
+      backgroundColor: colors.accent,
+    },
+    enrollButtonText: {
+      color: colors.onPrimary,
+      fontSize: FONT_SIZE.md,
+      fontWeight: FONT_WEIGHT.bold,
+    },
+    emptyState: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: SPACING.lg,
+    },
+    emptyTitle: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.lg,
+      fontWeight: FONT_WEIGHT.bold,
+      marginBottom: SPACING.md,
+    },
+  });

@@ -1,4 +1,5 @@
-import { COLORS, FONT_SIZE, SPACING } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
+import { AppTheme, FONT_SIZE, SPACING } from "@utils/theme";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +11,8 @@ interface OfflineBannerProps {
 export const OfflineBanner: React.FC<OfflineBannerProps> = ({
   isConnected,
 }) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(-60)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -76,24 +79,25 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
 
 export default OfflineBanner;
 
-const styles = StyleSheet.create({
-  banner: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 60,
-    backgroundColor: COLORS.error,
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.sm,
-  },
-  inner: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  text: {
-    color: COLORS.onPrimary,
-    fontSize: FONT_SIZE.sm,
-    textAlign: "center",
-  },
-});
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    banner: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 60,
+      backgroundColor: colors.error,
+      paddingHorizontal: SPACING.lg,
+      paddingBottom: SPACING.sm,
+    },
+    inner: {
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    text: {
+      color: colors.onPrimary,
+      fontSize: FONT_SIZE.sm,
+      textAlign: "center",
+    },
+  });

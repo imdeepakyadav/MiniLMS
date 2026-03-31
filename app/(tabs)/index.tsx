@@ -10,7 +10,14 @@ import { useDebounce } from "@hooks/useDebounce";
 import { LegendList } from "@legendapp/list";
 import { useAuthStore } from "@store/authStore";
 import { useCourseStore } from "@store/courseStore";
-import { COLORS, FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "@utils/theme";
+import { useTheme } from "@store/themeStore";
+import {
+  AppTheme,
+  FONT_SIZE,
+  FONT_WEIGHT,
+  RADIUS,
+  SPACING,
+} from "@utils/theme";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -24,6 +31,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { isLoading, error, refetch } = useCourses();
   const { toggleBookmark } = useBookmarks();
   const { user } = useAuthStore();
@@ -98,13 +107,13 @@ export default function HomeScreen() {
         <Ionicons
           name="search"
           size={FONT_SIZE.lg}
-          color={COLORS.primary}
+          color={colors.primary}
           style={styles.searchIcon}
         />
         <TextInput
           style={styles.searchInput}
           placeholder="Search courses or instructors"
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor={colors.textSecondary}
           value={searchText}
           onChangeText={setSearchText}
         />
@@ -171,81 +180,82 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: SPACING.md,
-  },
-  logoText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: FONT_WEIGHT.bold,
-    marginBottom: SPACING.xs,
-    letterSpacing: 0.4,
-  },
-  subtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-  },
-  greeting: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: FONT_WEIGHT.medium,
-    textAlign: "right",
-    flexShrink: 1,
-    marginLeft: SPACING.md,
-    marginTop: SPACING.xs,
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.md,
-  },
-  searchIcon: {
-    marginRight: SPACING.sm,
-  },
-  searchInput: {
-    flex: 1,
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-  },
-  errorBlock: {
-    marginBottom: SPACING.md,
-  },
-  skeletonGrid: {
-    paddingBottom: SPACING.xl,
-  },
-  listContent: {
-    paddingBottom: SPACING.xl,
-  },
-  emptyContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
-  columnWrapper: {
-    gap: SPACING.md,
-  },
-  gridItem: {
-    flex: 1,
-  },
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    textAlign: "center",
-    maxWidth: 280,
-  },
-});
+const createStyles = (colors: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      marginBottom: SPACING.md,
+    },
+    logoText: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.xxl,
+      fontWeight: FONT_WEIGHT.bold,
+      marginBottom: SPACING.xs,
+      letterSpacing: 0.4,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.sm,
+    },
+    greeting: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.sm,
+      fontWeight: FONT_WEIGHT.medium,
+      textAlign: "right",
+      flexShrink: 1,
+      marginLeft: SPACING.md,
+      marginTop: SPACING.xs,
+    },
+    searchBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.md,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: SPACING.md,
+    },
+    searchIcon: {
+      marginRight: SPACING.sm,
+    },
+    searchInput: {
+      flex: 1,
+      color: colors.textPrimary,
+      fontSize: FONT_SIZE.md,
+    },
+    errorBlock: {
+      marginBottom: SPACING.md,
+    },
+    skeletonGrid: {
+      paddingBottom: SPACING.xl,
+    },
+    listContent: {
+      paddingBottom: SPACING.xl,
+    },
+    emptyContent: {
+      flexGrow: 1,
+      justifyContent: "center",
+    },
+    columnWrapper: {
+      gap: SPACING.md,
+    },
+    gridItem: {
+      flex: 1,
+    },
+    emptyText: {
+      color: colors.textSecondary,
+      fontSize: FONT_SIZE.sm,
+      textAlign: "center",
+      maxWidth: 280,
+    },
+  });
