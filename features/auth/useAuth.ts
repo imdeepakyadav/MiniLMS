@@ -6,6 +6,28 @@ import { useState } from "react";
 import { LoginRequest, RegisterRequest, User } from "../../types/auth.types";
 import * as authService from "./authService";
 
+const resolveAccessToken = (value: unknown): string | null => {
+  if (typeof value === "string") {
+    return value.trim() ? value : null;
+  }
+
+  if (value && typeof value === "object") {
+    const tokenLikeValue = value as {
+      accessToken?: unknown;
+      token?: unknown;
+      data?: unknown;
+    };
+
+    return (
+      resolveAccessToken(tokenLikeValue.accessToken) ??
+      resolveAccessToken(tokenLikeValue.token) ??
+      resolveAccessToken(tokenLikeValue.data)
+    );
+  }
+
+  return null;
+};
+
 export const useAuth = () => {
   const { dispatch } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -13,8 +35,14 @@ export const useAuth = () => {
 
   const clearError = () => setError(null);
 
-  const persistSession = async (accessToken: string, user: User) => {
-    await saveToken(accessToken);
+  const persistSession = async (accessToken: unknown, user: User) => {
+    const resolvedToken = resolveAccessToken(accessToken);
+
+    if (!resolvedToken) {
+      throw new Error("Authentication token missing from response");
+    }
+
+    await saveToken(resolvedToken);
     await setItem(STORAGE_KEYS.USER_DATA, user);
     dispatch({ type: "LOGIN", payload: user });
   };
@@ -40,7 +68,6 @@ export const useAuth = () => {
     try {
       const response = await authService.register(data);
       await persistSession(response.data.accessToken, response.data.user);
-      console.log("Registration successful", response.data);
       return true;
     } catch (err: any) {
       setError(err.message || "Registration failed");
